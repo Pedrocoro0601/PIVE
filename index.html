@@ -508,8 +508,8 @@
                 <a href="#/joguinhos" class="jogos-btn-animated font-semibold px-5 py-2.5 rounded-full inline-flex items-center shadow-lg transition transform hover:scale-105">
                     <i class="fas fa-gamepad mr-2"></i> Jogos
                 </a>
-                <!-- NEW: Painel de Controle Button -->
-                <a href="#/painel-controle" class="bg-white text-primary font-semibold p-2.5 rounded-full inline-flex items-center shadow-md hover:bg-gray-100 transition" title="Painel de Controle">
+                <!-- NEW: Painel de Controle Button (apenas ícone) -->
+                <a href="#/painel-controle" class="bg-white text-primary font-semibold p-2.5 rounded-full inline-flex items-center justify-center shadow-md hover:bg-gray-100 transition" title="Painel de Controle">
                     <i class="fas fa-cogs text-lg"></i>
                 </a>
             </div>
@@ -809,6 +809,13 @@
             <h2 class="text-4xl font-bold text-primary text-center mb-12">Painel de Controle</h2>
             <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
                 <p class="text-gray-600 mb-4 text-center">ID do Usuário Logado: <span id="logged-in-user-id" class="font-semibold text-primary">Carregando...</span></p>
+                <!-- Logout Button for Control Panel -->
+                <div class="flex justify-center mb-6">
+                    <button id="cms-logout-btn" class="bg-red-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-600 transition">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Sair
+                    </button>
+                </div>
+
                 <div class="mb-6">
                     <label for="cms-section-select" class="block text-gray-700 text-sm font-bold mb-2">Selecione a Seção para Editar:</label>
                     <select id="cms-section-select" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
@@ -846,6 +853,26 @@
                             <label for="cms-item-content" class="block text-gray-700 text-sm font-bold mb-2">Conteúdo do Item (HTML, incluindo imagens, permitido):</label>
                             <textarea id="cms-item-content" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 h-40 resize-y leading-tight focus:outline-none focus:shadow-outline" placeholder="Conteúdo detalhado do item..."></textarea>
                         </div>
+                        <!-- NEW: Campo para URL da Imagem -->
+                        <div>
+                            <label for="cms-item-image-url" class="block text-gray-700 text-sm font-bold mb-2">URL da Imagem (opcional):</label>
+                            <input type="url" id="cms-item-image-url" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Cole a URL da imagem aqui">
+                        </div>
+                        <!-- NEW: Campo para Upload de Imagem -->
+                        <div class="border border-dashed border-gray-300 rounded-lg p-4 text-center">
+                            <label for="cms-item-image-file" class="block text-gray-700 text-sm font-bold mb-2 cursor-pointer">
+                                Ou faça Upload de uma Imagem:
+                            </label>
+                            <input type="file" id="cms-item-image-file" accept="image/*" class="hidden">
+                            <button type="button" id="cms-upload-image-btn" class="bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-600 transition">
+                                <i class="fas fa-upload mr-2"></i> Selecionar e Enviar Imagem
+                            </button>
+                            <p id="cms-image-upload-status" class="text-sm text-gray-500 mt-2"></p>
+                            <div id="cms-image-preview" class="mt-4 hidden">
+                                <img src="" alt="Pré-visualização da Imagem" class="max-w-full h-auto rounded-lg shadow-md mx-auto">
+                            </div>
+                        </div>
+
                         <div class="flex items-center justify-between">
                             <button type="submit" id="cms-save-btn" class="bg-accent text-white font-bold py-2 px-4 rounded-lg hover:bg-accent-dark transition">
                                 <i class="fas fa-save mr-2"></i> Salvar Item
@@ -857,6 +884,32 @@
                         </div>
                     </form>
                 </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- NEW: Login Template -->
+    <template id="template-login">
+        <div class="page container mx-auto px-6 pt-32 flex items-center justify-center min-h-[calc(100vh-160px)]">
+            <div class="bg-white rounded-xl shadow-lg p-8 md:p-12 w-full max-w-md text-center">
+                <h2 class="text-4xl font-bold text-primary mb-6">Login</h2>
+                <form id="login-form" class="space-y-4">
+                    <div>
+                        <label for="login-email" class="sr-only">Email</label>
+                        <input type="email" id="login-email" placeholder="Seu e-mail" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div>
+                        <label for="login-password" class="sr-only">Senha</label>
+                        <input type="password" id="login-password" placeholder="Sua senha" class="shadow appearance-none border rounded w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <button type="submit" class="bg-primary text-white font-bold py-3 px-6 rounded-lg hover:bg-primary-dark transition w-full">
+                            Entrar
+                        </button>
+                    </div>
+                    <p id="login-status-message" class="text-sm font-semibold mt-4 text-red-600"></p>
+                </form>
+                <!-- Removido: Opção de registro -->
             </div>
         </div>
     </template>
@@ -915,9 +968,11 @@
 
     <script type="module">
     // Firebase SDK imports
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js"; // Updated Firebase SDK version
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js"; // Updated Firebase SDK version
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js"; // Updated Firebase SDK version
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-storage.js";
+
 
     document.addEventListener('DOMContentLoaded', () => {
         // ---- CORE VARIABLES ----
@@ -927,7 +982,8 @@
         // ---- FIREBASE INITIALIZATION ----
         let db;
         let auth;
-        let appId; // This will now come from firebaseConfig.projectId
+        let storage; // Firebase Storage instance
+        let appId;
         let userId;
         let isAuthReady = false; // Flag to ensure Firestore operations happen after auth
 
@@ -947,7 +1003,7 @@
                 // Define appId usando o projectId do seu firebaseConfig
                 appId = firebaseConfig.projectId;
 
-                if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "SUA_API_KEY" || firebaseConfig.projectId === "SEU_PROJECT_ID") {
+                if (!firebaseConfig.apiKey || firebaseConfig.apiKey.includes("SUA_API_KEY") || firebaseConfig.projectId.includes("SEU_PROJECT_ID")) {
                     console.error("Firebase config is not set. Please update firebaseConfig with your actual keys.");
                     showCustomAlert('Erro de Configuração', 'As credenciais do Firebase não foram configuradas. O painel de controle não funcionará. Por favor, edite o código HTML na seção `firebaseConfig` com suas chaves reais.');
                     return;
@@ -956,9 +1012,7 @@
                 const app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
-
-                // Sign in anonymously for basic access. For more robust CMS, consider user authentication.
-                await signInAnonymously(auth);
+                storage = getStorage(app); // Initialize Firebase Storage
 
                 // Listen for auth state changes
                 onAuthStateChanged(auth, (user) => {
@@ -969,6 +1023,10 @@
                         const loggedInUserIdSpan = document.getElementById('logged-in-user-id');
                         if (loggedInUserIdSpan) {
                             loggedInUserIdSpan.textContent = userId;
+                        }
+                        // If on login page and authenticated, redirect to control panel
+                        if (window.location.hash === '#/login' && isAuthReady) {
+                             window.location.hash = '#/painel-controle';
                         }
                         // Re-render current page if it's the CMS page and data needs to be loaded
                         if (window.location.hash === '#/painel-controle') {
@@ -981,6 +1039,10 @@
                         const loggedInUserIdSpan = document.getElementById('logged-in-user-id');
                         if (loggedInUserIdSpan) {
                             loggedInUserIdSpan.textContent = 'Não Autenticado';
+                        }
+                        // If trying to access control panel and not authenticated, redirect to login
+                        if (window.location.hash === '#/painel-controle') {
+                            window.location.hash = '#/login';
                         }
                     }
                 });
@@ -1008,7 +1070,8 @@
             '/joguinhos/classificacao-oocitos': 'template-joguinhos',
             '/opu': 'template-opu',
             '/mesa-selecao': 'template-mesa-selecao',
-            '/painel-controle': 'template-painel-controle'
+            '/painel-controle': 'template-painel-controle',
+            '/login': 'template-login' // NEW: Login route
         };
 
         // Sections that will use dynamic content from Firestore
@@ -1037,14 +1100,21 @@
             `;
 
             if (!isAuthReady || !userId) {
-                console.warn('Firebase not ready or user not authenticated. Cannot fetch content.');
-                // Try again after a short delay if not ready, or display error
-                setTimeout(() => fetchAndRenderAccordionContent(containerId, sectionName), 500);
+                // If not authenticated, still load content but warn. For public content, remove userId from path.
+                // For this scenario, the data is user-specific, so if not logged in, it will show as empty.
+                // If you want content to be publicly visible, move it out of /users/{userId}/ path in Firestore.
+                console.warn('Firebase not ready or user not authenticated. Content might be restricted.');
+                 container.innerHTML = `
+                        <div class="text-center p-8 bg-white rounded-xl shadow-lg">
+                            <p class="text-gray-600">Nenhum conteúdo encontrado para esta seção.</p>
+                            <p class="text-gray-500 text-sm mt-2">Este conteúdo pode ser privado ou ainda não foi adicionado. Por favor, faça login no <a href="#/painel-controle" class="text-accent hover:underline">Painel de Controle</a> para gerenciar.</p>
+                        </div>
+                    `;
                 return;
             }
 
             try {
-                // Path: /artifacts/{appId}/users/{userId}/siteContent/{sectionName}
+                // Path: /artifacts/{appId}/users/${userId}/siteContent/{sectionName}
                 const docRef = doc(db, `artifacts/${appId}/users/${userId}/siteContent`, sectionName);
                 const docSnap = await getDoc(docRef);
 
@@ -1053,6 +1123,7 @@
                 if (docSnap.exists() && docSnap.data().items && docSnap.data().items.length > 0) {
                     const items = docSnap.data().items;
                     items.forEach(item => {
+                        const imageUrlHtml = item.imageUrl ? `<div class="mb-4 text-center"><img src="${item.imageUrl}" alt="${item.title}" class="max-w-full h-auto mx-auto rounded-lg shadow-md" onerror="this.onerror=null;this.src='https://placehold.co/400x200/cccccc/333333?text=Imagem+Nao+Encontrada';"></div>` : '';
                         const accordionItemHtml = `
                             <div class="accordion-item bg-white rounded-xl shadow-lg overflow-hidden">
                                 <div class="accordion-header p-6 flex justify-between items-center hover:bg-indigo-50" data-accordion-btn>
@@ -1060,7 +1131,10 @@
                                     <i class="fas fa-chevron-down accordion-icon text-primary"></i>
                                 </div>
                                 <div class="accordion-content">
-                                    <div class="p-6 pt-0">${item.content}</div>
+                                    <div class="p-6 pt-0">
+                                        ${imageUrlHtml}
+                                        <p class="text-gray-700 leading-relaxed">${item.content}</p>
+                                    </div>
                                 </div>
                             </div>
                         `;
@@ -1090,6 +1164,12 @@
         const renderPage = async (path) => {
             closeAllModals();
 
+            // Redirect to login if trying to access control panel without authentication
+            if (path === '/painel-controle' && !isAuthReady && !auth.currentUser) {
+                window.location.hash = '#/login';
+                return;
+            }
+
             const templateId = routes[path] || routes['/'];
             const template = document.getElementById(templateId);
 
@@ -1105,13 +1185,12 @@
                 } else if (path === '/video-aulas') {
                     addVideoLinkListeners();
                 } else if (path === '/painel-controle') {
-                    // First, append the content
-                    // The pageContent is already appended by appRoot.appendChild(pageContent)
-                    // Then, get fresh references and set up listeners
-                    setupCmsElementsAndListeners();
-                    // Then load content
-                    loadCmsSectionContent();
-                } else if (dynamicContentSections[path.substring(1)]) { // Check if it's a dynamic content page
+                    setupCmsElementsAndListeners(); // Setup CMS listeners dynamically
+                    loadCmsSectionContent(); // Load initial content for the selected section (or default)
+                } else if (path === '/login') {
+                    setupLoginListeners(); // Setup login form listeners
+                }
+                else if (dynamicContentSections[path.substring(1)]) { // Check if it's a dynamic content page
                     const sectionName = path.substring(1);
                     const containerId = `${sectionName}-content`; // e.g., 'fisiologia-content'
                     await fetchAndRenderAccordionContent(containerId, sectionName);
@@ -1421,7 +1500,7 @@
             try {
                 Object.keys(routes).forEach(path => {
                     // Exclude pages that are just lists or modals themselves or CMS-managed
-                    if (['/video-aulas', '/portfolio', '/joguinhos', '/joguinhos/classificacao-oocitos', '/painel-controle'].includes(path) || dynamicContentSections[path.substring(1)]) {
+                    if (['/video-aulas', '/portfolio', '/joguinhos', '/joguinhos/classificacao-oocitos', '/painel-controle', '/login'].includes(path) || dynamicContentSections[path.substring(1)]) {
                         // Skip dynamic content pages, their content will be fetched from Firestore directly
                         return;
                     }
@@ -1798,6 +1877,11 @@
         let cmsItemId;
         let cmsItemTitle;
         let cmsItemContent;
+        let cmsItemImageUrl; // NEW: Image URL input field
+        let cmsItemImageFile; // NEW: Image file input field
+        let cmsUploadImageBtn; // NEW: Upload button
+        let cmsImageUploadStatus; // NEW: Upload status message
+        let cmsImagePreview; // NEW: Image preview element
         let cmsSaveBtn;
         let cmsCancelEditBtn;
         let cmsStatusMessage;
@@ -1815,6 +1899,11 @@
             cmsItemId = document.getElementById('cms-item-id');
             cmsItemTitle = document.getElementById('cms-item-title');
             cmsItemContent = document.getElementById('cms-item-content');
+            cmsItemImageUrl = document.getElementById('cms-item-image-url'); // NEW
+            cmsItemImageFile = document.getElementById('cms-item-image-file'); // NEW
+            cmsUploadImageBtn = document.getElementById('cms-upload-image-btn'); // NEW
+            cmsImageUploadStatus = document.getElementById('cms-image-upload-status'); // NEW
+            cmsImagePreview = document.getElementById('cms-image-preview'); // NEW
             cmsSaveBtn = document.getElementById('cms-save-btn');
             cmsCancelEditBtn = document.getElementById('cms-cancel-edit-btn');
             cmsStatusMessage = document.getElementById('cms-status-message');
@@ -1825,16 +1914,20 @@
             if (cmsAddItemBtn) cmsAddItemBtn.removeEventListener('click', resetCmsForm);
             if (cmsItemForm) cmsItemForm.removeEventListener('submit', saveCmsItem);
             if (cmsCancelEditBtn) cmsCancelEditBtn.removeEventListener('click', resetCmsForm);
+            if (cmsUploadImageBtn) cmsUploadImageBtn.removeEventListener('click', handleImageUploadClick); // NEW
+            if (cmsItemImageFile) cmsItemImageFile.removeEventListener('change', handleImageFileSelect); // NEW
 
             // Add event listeners
             if (cmsSectionSelect) cmsSectionSelect.addEventListener('change', loadCmsSectionContent);
             if (cmsAddItemBtn) cmsAddItemBtn.addEventListener('click', () => resetCmsForm());
             if (cmsItemForm) cmsItemForm.addEventListener('submit', saveCmsItem);
             if (cmsCancelEditBtn) cmsCancelEditBtn.addEventListener('click', () => resetCmsForm());
+            if (cmsUploadImageBtn) cmsUploadImageBtn.addEventListener('click', handleImageUploadClick); // NEW
+            if (cmsItemImageFile) cmsItemImageFile.addEventListener('change', handleImageFileSelect); // NEW
         };
 
         const showCmsLoading = (containerEl) => {
-            if (containerEl) { // Added null check
+            if (containerEl) {
                 containerEl.innerHTML = `
                     <div class="text-center p-4 bg-gray-50 rounded-lg">
                         <div class="spinner mx-auto mb-2"></div>
@@ -1845,17 +1938,62 @@
         };
 
         const showCmsMessage = (message, isError = false) => {
-            if (cmsStatusMessage) { // Added null check
+            if (cmsStatusMessage) {
                 cmsStatusMessage.textContent = message;
                 cmsStatusMessage.className = `text-sm font-semibold ml-4 ${isError ? 'text-red-600' : 'text-green-600'}`;
                 setTimeout(() => {
-                    if (cmsStatusMessage) { // Added null check here as well for delayed execution
+                    if (cmsStatusMessage) {
                         cmsStatusMessage.textContent = '';
                         cmsStatusMessage.className = 'text-sm font-semibold ml-4';
                     }
                 }, 3000);
             }
         };
+
+        // NEW: Image Upload Logic
+        const handleImageUploadClick = () => {
+            if (cmsItemImageFile) {
+                cmsItemImageFile.click(); // Trigger the file input click
+            }
+        };
+
+        const handleImageFileSelect = async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!storage || !userId) {
+                showCustomAlert('Erro de Upload', 'Serviço de Storage não inicializado ou usuário não autenticado.');
+                return;
+            }
+
+            // Show loading state
+            if (cmsImageUploadStatus) cmsImageUploadStatus.textContent = 'Enviando imagem...';
+            if (cmsUploadImageBtn) cmsUploadImageBtn.disabled = true;
+
+            const filePath = `images/${userId}/${cmsSectionSelect.value || 'geral'}/${file.name}`;
+            const storageRef = ref(storage, filePath);
+
+            try {
+                const snapshot = await uploadBytes(storageRef, file);
+                const downloadURL = await getDownloadURL(snapshot.ref);
+
+                if (cmsItemImageUrl) cmsItemImageUrl.value = downloadURL;
+                if (cmsImagePreview) {
+                    cmsImagePreview.querySelector('img').src = downloadURL;
+                    cmsImagePreview.classList.remove('hidden');
+                }
+                if (cmsImageUploadStatus) cmsImageUploadStatus.textContent = 'Imagem enviada com sucesso!';
+                showCmsMessage('Imagem enviada e URL preenchida!', false);
+            } catch (error) {
+                console.error("Erro ao fazer upload da imagem:", error);
+                if (cmsImageUploadStatus) cmsImageUploadStatus.textContent = `Erro: ${error.message}`;
+                showCustomAlert('Erro ao Enviar Imagem', `Não foi possível enviar a imagem: ${error.message}`);
+            } finally {
+                if (cmsUploadImageBtn) cmsUploadImageBtn.disabled = false;
+                event.target.value = ''; // Clear the file input
+            }
+        };
+
 
         const loadCmsSectionContent = async () => {
             // Ensure CMS elements are available before proceeding
@@ -1867,27 +2005,27 @@
 
             const selectedSection = cmsSectionSelect.value;
             if (!selectedSection) {
-                if (cmsEditorArea) cmsEditorArea.classList.add('hidden'); // Added null check
+                if (cmsEditorArea) cmsEditorArea.classList.add('hidden');
                 return;
             }
-            if (cmsEditorArea) cmsEditorArea.classList.remove('hidden'); // Added null check
+            if (cmsEditorArea) cmsEditorArea.classList.remove('hidden');
             showCmsLoading(cmsItemList);
             resetCmsForm(); // Clear the form when changing sections
 
             if (!isAuthReady || !userId) {
                 console.warn('Firebase not ready or user not authenticated for CMS.');
-                if (cmsItemList) { // Added null check
+                if (cmsItemList) {
                     cmsItemList.innerHTML = `<p class="text-red-500">Erro: Não foi possível carregar o painel de controle. Autenticação pendente ou falha.</p>`;
                 }
                 return;
             }
 
             try {
-                // Path: /artifacts/{appId}/users/${userId}/siteContent/{sectionName}
+                // Path: /artifacts/${appId}/users/${userId}/siteContent/${sectionName}
                 const docRef = doc(db, `artifacts/${appId}/users/${userId}/siteContent`, selectedSection);
                 const docSnap = await getDoc(docRef);
 
-                if (cmsItemList) cmsItemList.innerHTML = ''; // Clear loading spinner, Added null check
+                if (cmsItemList) cmsItemList.innerHTML = ''; // Clear loading spinner
 
                 if (docSnap.exists() && docSnap.data().items) {
                     currentSectionData = docSnap.data();
@@ -1899,14 +2037,14 @@
             } catch (error) {
                 console.error("Erro ao carregar conteúdo do CMS:", error);
                 showCmsMessage("Erro ao carregar conteúdo.", true);
-                if (cmsItemList) { // Added null check
+                if (cmsItemList) {
                     cmsItemList.innerHTML = `<p class="text-red-500">Erro ao carregar conteúdo: ${error.message}</p>`;
                 }
             }
         };
 
         const displayCmsItems = (items) => {
-            if (!cmsItemList) return; // Added null check
+            if (!cmsItemList) return;
             cmsItemList.innerHTML = '';
             if (items.length === 0) {
                 cmsItemList.innerHTML = '<p class="text-gray-600">Nenhum item encontrado nesta seção. Adicione um novo!</p>';
@@ -1938,6 +2076,10 @@
             if (cmsItemId) cmsItemId.value = '';
             if (cmsItemTitle) cmsItemTitle.value = '';
             if (cmsItemContent) cmsItemContent.value = '';
+            if (cmsItemImageUrl) cmsItemImageUrl.value = ''; // NEW
+            if (cmsImagePreview) cmsImagePreview.classList.add('hidden'); // NEW
+            if (cmsImageUploadStatus) cmsImageUploadStatus.textContent = ''; // NEW
+
             currentEditingItemId = null;
             const cmsFormTitle = document.getElementById('cms-form-title');
             if (cmsFormTitle) cmsFormTitle.textContent = 'Adicionar Novo Item';
@@ -1955,6 +2097,14 @@
                 if (cmsItemId) cmsItemId.value = itemToEdit.id;
                 if (cmsItemTitle) cmsItemTitle.value = itemToEdit.title;
                 if (cmsItemContent) cmsItemContent.value = itemToEdit.content;
+                if (cmsItemImageUrl) cmsItemImageUrl.value = itemToEdit.imageUrl || ''; // NEW
+                if (cmsImagePreview) { // NEW
+                    const imgEl = cmsImagePreview.querySelector('img');
+                    if (imgEl) imgEl.src = itemToEdit.imageUrl || '';
+                    if (itemToEdit.imageUrl) cmsImagePreview.classList.remove('hidden');
+                    else cmsImagePreview.classList.add('hidden');
+                }
+
                 currentEditingItemId = id;
                 const cmsFormTitle = document.getElementById('cms-form-title');
                 if (cmsFormTitle) cmsFormTitle.textContent = `Editando: ${itemToEdit.title}`;
@@ -1970,7 +2120,7 @@
 
         const saveCmsItem = async (event) => {
             event.preventDefault();
-            if (cmsSaveBtn) { // Added null check
+            if (cmsSaveBtn) {
                 cmsSaveBtn.disabled = true;
                 cmsSaveBtn.innerHTML = '<div class="spinner w-5 h-5 border-2 mx-auto"></div>'; // Show spinner
             }
@@ -1978,10 +2128,11 @@
             const id = cmsItemId.value || crypto.randomUUID(); // Generate new ID if adding
             const title = cmsItemTitle.value.trim();
             const content = cmsItemContent.value.trim();
+            const imageUrl = cmsItemImageUrl ? cmsItemImageUrl.value.trim() : ''; // NEW
 
             if (!title || !content) {
                 showCmsMessage("Título e conteúdo não podem estar vazios.", true);
-                if (cmsSaveBtn) { // Added null check
+                if (cmsSaveBtn) {
                     cmsSaveBtn.disabled = false;
                     cmsSaveBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Salvar Item';
                 }
@@ -1992,14 +2143,16 @@
                 const docRef = doc(db, `artifacts/${appId}/users/${userId}/siteContent`, selectedSection);
                 let updatedItems = [];
 
+                const newItem = { id, title, content, imageUrl }; // Include imageUrl
+
                 if (currentEditingItemId) {
                     // Edit existing item
                     updatedItems = currentSectionData.items.map(item =>
-                        item.id === id ? { id, title, content } : item
+                        item.id === id ? newItem : item
                     );
                 } else {
                     // Add new item
-                    updatedItems = [...currentSectionData.items, { id, title, content }];
+                    updatedItems = [...currentSectionData.items, newItem];
                 }
 
                 await setDoc(docRef, { items: updatedItems });
@@ -2010,7 +2163,7 @@
                 console.error("Erro ao salvar item do CMS:", error);
                 showCmsMessage(`Erro ao salvar conteúdo: ${error.message}`, true);
             } finally {
-                if (cmsSaveBtn) { // Added null check
+                if (cmsSaveBtn) {
                     cmsSaveBtn.disabled = false;
                     cmsSaveBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Salvar Item';
                 }
@@ -2021,7 +2174,7 @@
             const confirmed = await showCustomAlert('Confirmar Exclusão', 'Tem certeza que deseja excluir este item de conteúdo? Esta ação não pode ser desfeita.', true);
             if (!confirmed) return;
 
-            if (cmsSaveBtn) cmsSaveBtn.disabled = true; // Disable save button during delete, Added null check
+            if (cmsSaveBtn) cmsSaveBtn.disabled = true; // Disable save button during delete
             const selectedSection = cmsSectionSelect.value;
 
             try {
@@ -2036,9 +2189,76 @@
                 console.error("Erro ao excluir item do CMS:", error);
                 showCmsMessage(`Erro ao excluir item: ${error.message}`, true);
             } finally {
-                if (cmsSaveBtn) cmsSaveBtn.disabled = false; // Added null check
+                if (cmsSaveBtn) cmsSaveBtn.disabled = false;
             }
         };
+
+        // --- Login Functionality ---
+        let loginForm;
+        let loginEmailInput;
+        let loginPasswordInput;
+        let loginStatusMessage;
+        // let registerBtn; // Removed
+
+        const setupLoginListeners = () => {
+            loginForm = document.getElementById('login-form');
+            loginEmailInput = document.getElementById('login-email');
+            loginPasswordInput = document.getElementById('login-password');
+            loginStatusMessage = document.getElementById('login-status-message');
+            // registerBtn = document.getElementById('register-btn'); // Removed
+
+            if (loginForm) loginForm.addEventListener('submit', handleLogin);
+            // if (registerBtn) registerBtn.addEventListener('click', handleRegister); // Removed
+        };
+
+        const handleLogin = async (event) => {
+            event.preventDefault();
+            const email = loginEmailInput.value;
+            const password = loginPasswordInput.value;
+            if (!email || !password) {
+                if(loginStatusMessage) loginStatusMessage.textContent = 'Por favor, preencha e-mail e senha.';
+                return;
+            }
+
+            if(loginStatusMessage) loginStatusMessage.textContent = 'Entrando...';
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                if(loginStatusMessage) loginStatusMessage.textContent = 'Login bem-sucedido!';
+                window.location.hash = '#/painel-controle'; // Redirect to control panel on success
+            } catch (error) {
+                console.error("Erro no login:", error);
+                let errorMessage = 'Erro ao fazer login.';
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    errorMessage = 'E-mail ou senha inválidos.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Formato de e-mail inválido.';
+                }
+                if(loginStatusMessage) loginStatusMessage.textContent = errorMessage;
+            }
+        };
+
+        // handleRegister function removed
+
+        // Logout function for the control panel
+        const handleLogout = async () => {
+            const confirmed = await showCustomAlert('Confirmar Saída', 'Tem certeza que deseja sair?', true);
+            if (!confirmed) return;
+            try {
+                await signOut(auth);
+                showCustomAlert('Deslogado', 'Você foi desconectado com sucesso.');
+                window.location.hash = '#/login'; // Redirect to login page after logout
+            } catch (error) {
+                console.error("Erro ao fazer logout:", error);
+                showCustomAlert('Erro ao Sair', `Não foi possível sair: ${error.message}`);
+            }
+        };
+
+        // Add Logout button in control panel if present
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'cms-logout-btn') {
+                handleLogout();
+            }
+        });
 
 
         // ---- INITIAL LOAD ----
