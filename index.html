@@ -1,0 +1,2053 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia de Reprodução Animal - Mv. Pedro Henrique</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" xintegrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Fuse.js for Search -->
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+
+    <style>
+        /* CONFIGURAÇÕES GLOBAIS E DE CORES */
+        :root {
+            --color-primary: #3730a3; /* New: Dark Blue (indigo-800) */
+            --color-primary-dark: #312e81; /* indigo-900 */
+            --color-accent: #4f46e5; /* indigo-600 */
+        }
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #f0f2f5;
+            color: #1a202c;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+        }
+        /* Paleta de Cores Atualizada */
+        .text-primary { color: var(--color-primary); }
+        .bg-primary { background-color: var(--color-primary); }
+        .hover\:bg-primary-dark:hover { background-color: var(--color-primary-dark); }
+        .text-accent { color: var(--color-accent); }
+        .bg-accent { background-color: var(--color-accent); }
+        .border-accent { border-color: var(--color-accent); }
+        .hover\:bg-accent-dark:hover { background-color: #4338ca; } /* indigo-700 */
+
+        /* HEADER COM EFEITO "GLASSMORPHISM" */
+        #header {
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(200, 200, 200, 0.3);
+        }
+
+        /* ANIMAÇÃO DE TRANSIÇÃO DE PÁGINA */
+        .page {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ESTILO ATIVO NO MENU DE NAVEGAÇÃO */
+        .nav-link.active, .dropdown-menu a.active {
+            color: var(--color-primary);
+            font-weight: 700;
+        }
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--color-primary);
+        }
+        /* CORREÇÃO: Aplica a cor ativa apenas para botões de texto, não para os com fundo sólido */
+        .nav-link[data-dropdown-button].active {
+             color: var(--color-primary) !important;
+             font-weight: 700;
+        }
+
+        /* DROPDOWN MENU */
+        .dropdown-menu {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Nested Dropdown Styling */
+        .dropdown-menu .group {
+            position: relative;
+        }
+
+        .dropdown-menu .group .dropdown-menu-nested {
+            left: 100%; /* Position to the right of parent menu item */
+            top: 0;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+            z-index: 20; /* Ensure it's above other elements */
+            min-width: 18rem; /* A bit wider for longer text */
+        }
+
+        .dropdown-menu .group:hover > .dropdown-menu-nested {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* MOBILE MENU & MODAL */
+        body.modal-open {
+            overflow: hidden;
+        }
+        #mobile-menu {
+            background-color: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s ease-in-out;
+        }
+        #mobile-menu > div {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+        #mobile-menu.open > div {
+            transform: translateX(0);
+        }
+        .mobile-accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out;
+        }
+        .mobile-accordion-btn .fa-chevron-down {
+            transition: transform 0.3s ease-in-out;
+        }
+        .mobile-accordion-btn.open .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+        .mobile-accordion-btn .fa-chevron-right { /* Style for nested accordion icons */
+            transition: transform 0.3s ease-in-out;
+        }
+        .mobile-accordion-btn.open .fa-chevron-right {
+            transform: rotate(90deg);
+        }
+
+        /* NEW: Mobile menu image animation (surge from center) */
+        @keyframes surgeFromCenter {
+            from {
+                opacity: 0;
+                transform: scale(0.5); /* Starts from 50% size */
+            }
+            to {
+                opacity: 1;
+                transform: scale(1); /* Expands to full size */
+            }
+        }
+
+        #mobile-menu.open .mobile-menu-image {
+            animation: surgeFromCenter 0.6s ease-out forwards; /* Apply new animation */
+            animation-delay: 0.2s; /* Slight delay after menu starts opening */
+            transform-origin: center center; /* Ensure scaling from center */
+        }
+
+        /* MOBILE MENU ACCORDION BUTTON ACTIVE STATE (HIGHLIGHT) */
+        .mobile-accordion-btn.mobile-parent-active {
+            color: var(--color-primary) !important; /* Overrides default text color */
+            font-weight: 700;
+            box-shadow: none; /* Remove shadow if background is gone */
+        }
+        .mobile-accordion-btn.mobile-parent-active .fa-chevron-down,
+        .mobile-accordion-btn.mobile-parent-active .fa-chevron-right {
+            color: var(--color-primary) !important; /* Ensures the icon color matches the text */
+        }
+        .mobile-accordion-btn.mobile-parent-active:hover {
+            background-color: transparent; /* Ensure no background on hover */
+        }
+
+        /* CUSTOM STYLE FOR OOCYTE SELECTION BUTTON IN MOBILE MENU */
+        .mobile-oocitos-btn {
+            background-color: var(--color-primary);
+            color: white !important;
+            font-weight: 700;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            border-radius: 0.5rem; /* rounded-lg */
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        .mobile-oocitos-btn:hover {
+            background-color: var(--color-primary-dark) !important; /* Darken on hover */
+        }
+
+        /* MODAL STYLES */
+        .modal-overlay { animation: fadeIn 0.3s ease-in-out; }
+        .modal-content { animation: slideInUp 0.4s ease-in-out; }
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* SEARCH HIGHLIGHT */
+        mark { background-color: #fef08a; padding: 2px 1px; border-radius: 3px; }
+
+        /* QUIZ OPTION STYLING */
+        .quiz-option.selected { background-color: #c7d2fe; border-color: var(--color-accent); }
+        .quiz-option.correct { background-color: #D1FAE5 !important; border-color: #10B981 !important; color: #064E3B; }
+        .quiz-option.incorrect { background-color: #FEE2E2 !important; border-color: #EF4444 !important; color: #991B1B; }
+
+        /* ANIMATED GRADIENT TEXT */
+        .animated-gradient-text {
+            background-image: linear-gradient(90deg, #4ade80, #bef264, #22c55e, #4ade80); /* green/lime */
+            background-size: 200% auto;
+            color: #000;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-flow 4s linear infinite;
+        }
+        .animated-gradient-logo {
+            background-image: linear-gradient(90deg, #f87171, #fb923c, #f59e0b, #f87171); /* red/orange */
+            background-size: 200% auto;
+            color: #000;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-flow-logo 6s linear infinite;
+        }
+        @keyframes gradient-flow { to { background-position: 200% center; } }
+        @keyframes gradient-flow-logo { to { background-position: -200% center; } }
+
+        /* Custom animation for jogos button */
+        @keyframes gradient-slide {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+
+        .jogos-btn-animated {
+            background: linear-gradient(to right, #ef4444, #f97316, #eab308, #22c55e, #3b82f6, #8b5cf6, #ec4899);
+            background-size: 200% auto;
+            animation: gradient-slide 3s linear infinite;
+            color: white; /* Ensure text is visible on gradient */
+        }
+        .jogos-btn-animated:hover {
+            animation: gradient-slide 0.5s linear infinite reverse; /* Faster reverse on hover */
+            transform: scale(1.05); /* Slight zoom on hover */
+        }
+
+        /* Animation for "Em produção" section in Joguinhos */
+        @keyframes pulse-icon {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Modified animation for production text to be a red gradient */
+        @keyframes red-gradient-fade {
+            0%, 100% {
+                background-position: 0% center;
+                opacity: 1;
+            }
+            50% {
+                background-position: 100% center;
+                opacity: 0.8;
+            }
+        }
+
+        .production-animation .fa-tools {
+            animation: pulse-icon 1.5s infinite ease-in-out;
+        }
+
+        .production-animation .animated-red-gradient-text {
+            background-image: linear-gradient(90deg, #ef4444, #f97316, #dc2626, #ef4444); /* Red/Orange gradient */
+            background-size: 200% auto;
+            color: #000; /* Fallback for non-webkit */
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: red-gradient-fade 2s infinite linear;
+        }
+
+        /* Style for the "Jogo extra" tag */
+        .extra-game-tag {
+            background-color: #EF4444; /* Red color */
+            color: white;
+            padding: 4px 8px;
+            border-radius: 9999px; /* Full rounded */
+            font-size: 0.875rem; /* Increased from 0.75rem to text-sm */
+            font-weight: bold; /* font-bold */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* shadow-md */
+            transform: rotate(12deg); /* subtle rotation for 3D/vertical feel */
+            transform-origin: top right;
+            position: absolute;
+            top: 8px; /* top-2 */
+            right: 8px; /* right-2 */
+            z-index: 10;
+        }
+
+        /* NEW: ACCORDION STYLES */
+        .accordion-header {
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .accordion-header .accordion-icon {
+            transition: transform 0.3s ease-in-out;
+        }
+        .accordion-header.active .accordion-icon {
+            transform: rotate(180deg);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out, opacity 0.3s ease-in-out;
+            opacity: 0;
+        }
+        .accordion-content.open {
+            opacity: 1;
+        }
+
+        /* NEW: Contact Button Animation for Mobile Menu */
+        @keyframes pop-in {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        .contact-btn-animated {
+            animation: pop-in 0.5s ease-out forwards;
+            animation-delay: 0.4s; /* Delay to appear after other elements */
+            background-color: white !important; /* Set background to white */
+            border: 2px solid var(--color-primary); /* Add dark blue border */
+        }
+        .contact-btn-animated:hover {
+            background-color: white !important; /* Ensures no color change on hover */
+        }
+
+        /* New animated gradient for contact button text */
+        .animated-contact-text {
+            background-image: linear-gradient(90deg, #3730a3, #4f46e5, #312e81, #3730a3); /* Shades of primary blue */
+            background-size: 200% auto;
+            color: #000; /* Fallback for non-webkit */
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-flow 4s linear infinite; /* Reuse gradient-flow animation */
+        }
+
+        /* Loading Spinner for CMS */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #4f46e5; /* Accent color */
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- HEADER & NAVIGATION -->
+    <header id="header" class="fixed top-0 left-0 right-0 z-50">
+        <nav class="container mx-auto px-6 h-20 flex justify-between items-center">
+            <!-- Normal Header View -->
+            <div id="header-main" class="flex justify-between items-center w-full transition-all duration-300">
+                <!-- Adjusted font size for mobile: text-base for small screens, lg:text-xl for large screens -->
+                <a href="#/" class="text-primary text-base lg:text-xl font-bold shrink-0" style="font-family: 'Montserrat', sans-serif;">
+                    <span class="animated-gradient-logo">Mv. Pedro Henrique</span>
+                </a>
+
+                <div class="hidden lg:flex flex-grow justify-end space-x-4 items-center">
+                    <div class="relative" data-dropdown-container>
+                        <button class="nav-link text-gray-600 hover:text-primary transition pb-1 inline-flex items-center" data-dropdown-button>Guia de Estudo <i class="fas fa-chevron-down text-xs ml-2"></i></button>
+                        <div class="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 hidden" data-dropdown-menu>
+                            <a href="#/fisiologia" class="nav-link block px-4 py-2 text-gray-700 hover:bg-indigo-50">Fisiologia</a>
+                        </div>
+                    </div>
+
+                    <div class="relative" data-dropdown-container>
+                        <button class="bg-primary text-white font-semibold px-4 py-2 rounded-full inline-flex items-center hover:bg-primary-dark transition shadow-sm" data-dropdown-button>Seleção de Oócitos <i class="fas fa-chevron-down text-xs ml-2"></i></button>
+                        <div class="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 hidden" data-dropdown-menu>
+                            <a href="#/guia" class="nav-link block px-4 py-2 text-gray-700 hover:bg-indigo-50">Guia de Oócitos</a>
+                            <a href="#/classificacao" class="nav-link block px-4 py-2 text-gray-700 hover:bg-indigo-50">Classificação</a>
+                            <!-- New: Mesa de Seleção button for desktop, moved inside Seleção de Oócitos -->
+                            <a href="#/mesa-selecao" class="nav-link block px-4 py-2 text-gray-700 hover:bg-indigo-50">Mesa de Seleção</a>
+                        </div>
+                    </div>
+
+                    <div class="relative" data-dropdown-container>
+                        <button class="nav-link text-gray-600 hover:text-primary transition pb-1 inline-flex items-center" data-dropdown-button>Técnicas e Práticas <i class="fas fa-chevron-down text-xs ml-2"></i></button>
+                        <div class="dropdown-menu absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl py-2 hidden" data-dropdown-menu>
+                            <a href="#/biotecnologias" class="nav-link block px-4 py-2 text-gray-700 hover:bg-indigo-50">Biotecnologias</a>
+                            <a href="#/tetf" class="nav-link block px-4 py-2 text-gray-700 hover:bg-indigo-50">TETF</a>
+                            <a href="#/laboratorial" class="nav-link block px-4 py-2 text-gray-700 hover:bg-indigo-50">Rotina Laboratorial</a>
+                             <!-- Direct link to OPU page for desktop -->
+                            <a href="#/opu" class="nav-link block px-4 py-2 text-gray-700 hover:bg-indigo-50">OPU</a>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-2 pl-4 border-l border-gray-300">
+                        <button id="start-quiz-btn-header" title="Testar Conhecimentos" class="text-gray-600 hover:text-primary transition text-lg w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-indigo-100 rounded-full">
+                            <i class="fas fa-graduation-cap"></i>
+                        </button>
+                        <!-- New: Guia de Raças button for desktop -->
+                        <button id="open-racas-btn-header" title="Guia de Raças" class="text-gray-600 hover:text-primary transition text-lg w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-indigo-100 rounded-full">
+                            <i class="fas fa-cow"></i>
+                        </button>
+                        <div class="relative">
+                            <input type="text" id="search-input-desktop" placeholder="Buscar..." class="bg-gray-100 border-2 border-transparent focus:border-accent focus:bg-white focus:outline-none rounded-full py-1.5 px-4 pl-10 text-sm w-40 transition-all">
+                            <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:hidden flex items-center space-x-4">
+                    <button id="mobile-search-open-btn" title="Buscar" class="text-primary transition text-xl"><i class="fas fa-search"></i></button>
+                    <button id="start-quiz-btn-header-mobile" title="Testar Conhecimentos" class="text-primary transition text-xl"><i class="fas fa-graduation-cap"></i></button>
+                    <!-- New: Guia de Raças button for mobile -->
+                    <button id="open-racas-btn-header-mobile" title="Guia de Raças" class="text-primary transition text-xl">
+                        <i class="fas fa-cow"></i>
+                    </button>
+                    <button id="menu-btn" class="text-primary focus:outline-none"><i class="fas fa-bars text-2xl"></i></button>
+                </div>
+            </div>
+
+            <div id="header-search-mobile" class="hidden flex items-center w-full transition-all duration-300">
+                <div class="relative w-full">
+                                <input type="text" id="search-input-mobile" placeholder="Buscar no site..." class="bg-gray-100 border-2 border-transparent focus:border-accent focus:bg-white focus:outline-none rounded-full py-2.5 px-4 pl-5 text-base w-full">
+                </div>
+                <button id="mobile-search-close-btn" class="text-gray-600 text-2xl ml-4">&times;</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden fixed inset-0 z-[70]">
+        <div id="mobile-menu-overlay" class="absolute inset-0 bg-black/50"></div>
+        <div class="relative h-full w-4/5 max-w-sm ml-auto bg-white shadow-lg p-6">
+            <button id="close-menu-btn" class="absolute top-4 right-4 text-gray-600 text-3xl">&times;</button>
+            <h3 class="text-2xl font-bold text-primary mt-8 mb-6">Menu</h3>
+            <nav class="flex flex-col space-y-2">
+                <div>
+                    <button class="mobile-accordion-btn w-full flex justify-between items-center py-3 text-xl text-gray-800 hover:text-primary">
+                        <span>Guia de Estudo</span>
+                        <i class="fas fa-chevron-down text-sm"></i>
+                    </button>
+                    <div class="mobile-accordion-content pl-4">
+                        <a href="#/fisiologia" class="nav-link-mobile block py-2 text-lg text-gray-600">Fisiologia</a>
+                    </div>
+                </div>
+                <div>
+                    <!-- Highlighted "Seleção de Oócitos" button -->
+                    <button class="mobile-accordion-btn mobile-oocitos-btn w-full flex justify-between items-center py-3 text-xl hover:bg-primary-dark transition">
+                        <span>Seleção de Oócitos</span>
+                        <i class="fas fa-chevron-down text-sm"></i>
+                    </button>
+                    <div class="mobile-accordion-content pl-4">
+                        <a href="#/guia" class="nav-link-mobile block py-2 text-lg text-gray-600">Guia de Oócitos</a>
+                        <a href="#/classificacao" class="nav-link-mobile block py-2 text-lg text-gray-600">Classificação</a>
+                        <!-- New: Mesa de Seleção link for mobile menu, moved inside Seleção de Oócitos -->
+                        <a href="#/mesa-selecao" class="nav-link-mobile block py-2 text-lg text-gray-600">Mesa de Seleção</a>
+                    </div>
+                </div>
+                    <div>
+                    <button class="mobile-accordion-btn w-full flex justify-between items-center py-3 text-xl text-gray-800 hover:text-primary">
+                        <span>Técnicas e Práticas</span>
+                        <i class="fas fa-chevron-down text-sm"></i>
+                    </button>
+                    <div class="mobile-accordion-content pl-4">
+                        <a href="#/biotecnologias" class="nav-link-mobile block py-2 text-lg text-gray-600">Biotecnologias</a>
+                        <a href="#/tetf" class="nav-link-mobile block py-2 text-lg text-gray-600">TETF</a>
+                        <a href="#/laboratorial" class="nav-link-mobile block py-2 text-lg text-gray-600">Rotina Laboratorial</a>
+                        <!-- Direct link to OPU page for mobile -->
+                        <a href="#/opu" class="nav-link-mobile block py-2 text-lg text-gray-600">OPU</a>
+                    </div>
+                </div>
+                <!-- Original Mesa de Seleção removed from top-level -->
+                <!-- New: Guia de Raças link for mobile menu -->
+                <a href="#/racas" class="nav-link-mobile block py-3 text-xl text-gray-800 hover:text-primary">Guia de Raças</a>
+
+                <!-- Adição da imagem no menu mobile -->
+                <div class="mt-8 px-4 py-4 flex justify-center">
+                    <!-- Added 'mobile-menu-image' class for animation -->
+                    <img src="logotipo.png" alt="Bovine Oocyte Selection for FIV" class="w-full h-auto block mx-auto mobile-menu-image">
+                </div>
+                <!-- NOVO: Botão "Entre em contato" animado -->
+                <div class="mt-8 px-4 flex justify-center"> <!-- Changed mt-4 to mt-8 -->
+                    <a href="https://wa.me/SEU_NUMERO_AQUI?text=Quero%20te%20contratar!" class="contact-btn-animated bg-white font-semibold px-6 py-3 rounded-full inline-flex items-center transition shadow-md border border-primary">
+                        <img src="vaca.gif" alt="Ícone de Contato" class="w-6 h-6 mr-2"> <!-- Changed icon to GIF -->
+                        <span class="animated-contact-text">Entre em contato</span>
+                    </a>
+                </div>
+                <!-- Fim da adição do botão -->
+
+            </nav>
+        </div>
+    </div>
+
+    <main id="app-root"></main>
+
+    <footer class="bg-primary text-white py-8 mt-16">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; <span id="current-year"></span> - Mv. Pedro Henrique | Guia de estudos.</p>
+            <p class="text-sm" style="color: #a5b4fc;">Desenvolvido por Pedro Henrique com base em conteúdos online.</p>
+            <div class="mt-6 flex justify-center space-x-4"> <!-- Adjusted to use flexbox for buttons -->
+                <a href="#/portfolio" class="bg-accent text-white font-semibold px-5 py-2.5 rounded-full inline-flex items-center hover:bg-accent-dark transition shadow-md">
+                    Portfólio
+                </a>
+                <!-- Updated Joguinhos button to Jogos -->
+                <a href="#/joguinhos" class="jogos-btn-animated font-semibold px-5 py-2.5 rounded-full inline-flex items-center shadow-lg transition transform hover:scale-105">
+                    <i class="fas fa-gamepad mr-2"></i> Jogos
+                </a>
+                <!-- NEW: Painel de Controle Button -->
+                <a href="#/painel-controle" class="bg-white text-primary font-semibold p-2.5 rounded-full inline-flex items-center shadow-md hover:bg-gray-100 transition" title="Painel de Controle">
+                    <i class="fas fa-cogs text-lg"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- TEMPLATES -->
+    <template id="template-inicio"><div class="page"><section class="relative min-h-screen flex items-center justify-center bg-primary"><div class="relative text-center text-white p-6"><h1 class="text-5xl md:text-7xl font-bold mb-4" style="font-family: 'Montserrat', sans-serif;">Reprodução animal</h1><h2 class="text-3xl md:text-4xl">Guia de estudo em <span class="animated-gradient-text">biotecnologias da reprodução</span></h2></div></section></div></template>
+
+    <template id="template-fisiologia">
+        <div class="page container mx-auto px-6 pt-32">
+            <h2 class="text-4xl font-bold text-primary text-center mb-12">Fisiologia da Reprodução</h2>
+            <div id="fisiologia-content" class="max-w-4xl mx-auto space-y-4" data-accordion-container>
+                <!-- Content will be loaded dynamically from Firestore -->
+                <div class="text-center p-8 bg-white rounded-xl shadow-lg">
+                    <div class="spinner mx-auto mb-4"></div>
+                    <p class="text-gray-600">Carregando conteúdo de Fisiologia...</p>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="template-guia">
+        <div class="page container mx-auto px-6 pt-32">
+            <div class="bg-white rounded-xl shadow-lg p-8 md:p-12">
+                <div class="text-center max-w-4xl mx-auto mb-16">
+                    <h2 class="text-4xl font-bold text-primary mb-4">Guia de Oócitos</h2>
+                    <p class="text-lg text-gray-600 leading-relaxed">Este guia oferece uma abordagem técnica e detalhada sobre os métodos utilizados na seleção e avaliação de oócitos em bovinos. A seleção adequada é essencial para otimizar os processos de fertilização in vitro (FIV) e garantir a produção de embriões de alta qualidade.</p>
+                </div>
+                <div class="md:flex md:items-center md:space-x-12 mb-16">
+                    <div class="md:w-1/2 mb-8 md:mb-0">
+                        <img src="https://placehold.co/560x300/a5b4fc/3730a3?text=Oocito%20Bovino" alt="Oócito Bovino" class="w-full h-56 object-contain bg-gray-50">
+                    </div>
+                    <div class="md:w-1/2">
+                        <h3 class="text-3xl font-bold text-primary mb-4">O que é um oócito?</h3>
+                        <p class="text-lg text-gray-600 leading-relaxed">O oócito é o gameta feminino, gerado nos ovários e localizado dentro de cada folículo. Durante o ciclo reprodutivo da vaca, os oócitos amadurecem e são liberados dos folículos em um processo conhecido como ovulação.</p>
+                    </div>
+                </div>
+                <div class="bg-indigo-50 rounded-lg p-8">
+                    <h3 class="text-3xl font-bold text-primary text-center mb-8">Classificação da População Folicular</h3>
+                    <div class="max-w-5xl mx-auto">
+                        <div>
+                            <h4 class="text-2xl font-semibold text-accent mb-3">Folículos pré-antrais</h4>
+                            <p class="mb-6 text-gray-600">Incluem os folículos primordiais, intermediários, primários e secundários. Eles se diferenciam com base na forma e na quantidade de camadas das células da granulosa.</p>
+                            <h4 class="text-2xl font-semibold text-accent mb-3">Antrais ou cavitários</h4>
+                            <p class="text-gray-600">Com a proliferação das células da granulosa, uma área preenchida por fluido folicular é identificada, e os folículos passam a ser classificados como antrais ou terciários.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="template-classificacao">
+        <div class="page container mx-auto px-6 pt-32">
+            <h2 class="text-4xl font-bold text-primary text-center mb-12">Classificação Visual dos Oócitos</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                <!-- Card Grau I -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden transition-transform duration-300 hover:transform hover:-translate-y-2 flex flex-col">
+                    <img src="https://placehold.co/560x300/a5b4fc/3730a3?text=Oocito%20Grau%20I" alt="Oócito Grau I" class="w-full h-56 object-contain bg-gray-50">
+                    <div class="p-6 flex-grow">
+                        <h4 class="text-2xl font-bold text-primary mb-3">Grau I</h4>
+                        <p class="text-gray-600">Oócitos com mais de três camadas de células do cumulus compactado e citoplasma regular.</p>
+                    </div>
+                </div>
+
+                <!-- Card Grau II -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden transition-transform duration-300 hover:transform hover:-translate-y-2 flex flex-col">
+                    <img src="https://placehold.co/560x300/a5b4fc/3730a3?text=Oocito%20Grau%20II" alt="Oócito Grau II" class="w-full h-56 object-contain bg-gray-50">
+                    <div class="p-6 flex-grow">
+                        <h4 class="text-2xl font-bold text-primary mb-3">Grau II</h4>
+                        <p class="text-gray-600">Oócitos com duas camadas de células do cumulus, citoplasma regular ou com granulações finas.</p>
+                    </div>
+                </div>
+
+                <!-- Card Grau III -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden transition-transform duration-300 hover:transform hover:-translate-y-2 flex flex-col">
+                    <img src="https://placehold.co/560x300/a5b4fc/3730a3?text=Oocito%20Grau%20III" alt="Oócito Grau III" class="w-full h-56 object-contain bg-gray-50">
+                    <div class="p-6 flex-grow">
+                        <h4 class="text-2xl font-bold text-primary mb-3">Grau III</h4>
+                        <p class="text-gray-600">Oócitos com uma camada de células do cumulus ou parcialmente desnudos, com citoplasma irregular.</p>
+                    </div>
+                </div>
+
+                <!-- Card Desnudos -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden transition-transform duration-300 hover:transform hover:-translate-y-2 flex flex-col">
+                    <img src="https://placehold.co/560x300/a5b4fc/3730a3?text=Oocito%20Desnudo" alt="Oócito Desnudo" class="w-full h-56 object-contain bg-gray-50">
+                    <div class="p-6 flex-grow">
+                        <h4 class="text-2xl font-bold text-primary mb-3">Desnudos</h4>
+                        <p class="text-gray-600">Oócitos sem células do cumulus ou com sinais de degeneração.</p>
+                    </div>
+                </div>
+
+                <!-- Card Atrésico -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden transition-transform duration-300 hover:transform hover:-translate-y-2 flex flex-col">
+                    <img src="https://placehold.co/560x300/a5b4fc/3730a3?text=Oocito%20Atresico" alt="Oócito Atrésico" class="w-full h-56 object-contain bg-gray-50">
+                    <div class="p-6 flex-grow">
+                        <h4 class="text-2xl font-bold text-primary mb-3">Atrésico</h4>
+                        <p class="text-gray-600">Oócitos com sinais de atresia (degeneração), como citoplasma escuro e retraído.</p>
+                    </div>
+                </div>
+
+                <!-- Card Expandido -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden transition-transform duration-300 hover:transform hover:-translate-y-2 flex flex-col">
+                    <img src="https://placehold.co/560x300/a5b4fc/3730a3?text=Oocito%20Expandido" alt="Oócito Expandido" class="w-full h-56 object-contain bg-gray-50">
+                    <div class="p-6 flex-grow">
+                        <h4 class="text-2xl font-bold text-primary mb-3">Expandido</h4>
+                        <p class="text-gray-600">Oócitos com as células do cumulus expandidas, indicando o início da maturação.</p>
+                    </div>
+                </div>
+
+                <!-- Card Degenerado -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden transition-transform duration-300 hover:transform hover:-translate-y-2 flex flex-col">
+                    <img src="https://placehold.co/560x300/a5b4fc/3730a3?text=Oocito%20Degenerado" alt="Oócito Degenerado" class="w-full h-56 object-contain bg-gray-50">
+                    <div class="p-6 flex-grow">
+                        <h4 class="text-2xl font-bold text-primary mb-3">Degenerado</h4>
+                        <p class="text-gray-600">Oócitos com citoplasma escuro, retraído, ou com sinais de fragmentação, considerados inviáveis para FIV.</p>
+                    </div>
+                </div>
+
+                <!-- Card Citoplasma Irregular -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden transition-transform duration-300 hover:transform hover:-translate-y-2 flex flex-col">
+                    <img src="https://placehold.co/560x300/a5b4fc/3730a3?text=Oocito%20Citoplasma%20Irregular" alt="Oócito com Citoplasma Irregular" class="w-full h-56 object-contain bg-gray-50">
+                    <div class="p-6 flex-grow">
+                        <h4 class="text-2xl font-bold text-primary mb-3">Citoplasma Irregular</h4>
+                        <p class="text-gray-600">Oócitos com granulações grosseiras ou coloração heterogênea no citoplasma, indicando menor qualidade e baixo potencial de desenvolvimento.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </template>
+
+    <template id="template-video-aulas">
+        <div class="page container mx-auto px-6 pt-32">
+            <h2 class="text-4xl font-bold text-primary text-center mb-12">Videoaulas</h2>
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <p class="text-lg text-gray-600 leading-relaxed">Aprofunde os seus conhecimentos com a nossa coleção de videoaulas. Cada vídeo aborda tópicos essenciais da seleção de oócitos e biotecnologias da reprodução, apresentados de forma clara e objetiva. Clique em uma aula abaixo para assistir.</p>
+            </div>
+            <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8">
+                <div id="video-links-container" class="space-y-4">
+                    <!-- Links das Aulas - NOTE: Changed href to data-video-src and removed target -->
+                    <a href="#" data-video-src="https://drive.google.com/file/d/1o_DhVQbvOWfBqI5gziWAMNwE66Hg88UI/preview" class="video-link block w-full text-left p-4 border-2 border-gray-200 rounded-lg transition hover:bg-indigo-50 hover:border-accent"><div class="flex items-center justify-between"><span class="text-xl font-semibold text-gray-800">Aula 1</span><i class="fas fa-play-circle text-gray-400"></i></div></a>
+                    <a href="#" data-video-src="https://drive.google.com/file/d/146ZXcawa8y2Oozkhc5zrNkXyfnfH_QGf/preview" class="video-link block w-full text-left p-4 border-2 border-gray-200 rounded-lg transition hover:bg-indigo-50 hover:border-accent"><div class="flex items-center justify-between"><span class="text-xl font-semibold text-gray-800">Aula 2</span><i class="fas fa-play-circle text-gray-400"></i></div></a>
+                    <a href="#" data-video-src="https://drive.google.com/file/d/1SbhA6Q4xSBzCgKIFyuCMu9KOySUUlWIc/preview" class="video-link block w-full text-left p-4 border-2 border-200 rounded-lg transition hover:bg-indigo-50 hover:border-accent"><div class="flex items-center justify-between"><span class="text-xl font-semibold text-gray-800">Aula 3</span><i class="fas fa-play-circle text-gray-400"></i></div></a>
+                    <a href="#" data-video-src="https://drive.google.com/file/d/1GQ203Q_NOB3KTmO3CnI16DOqolkL2OxO/preview" class="video-link block w-full text-left p-4 border-2 border-gray-200 rounded-lg transition hover:bg-indigo-50 hover:border-accent"><div class="flex items-center justify-between"><span class="text-xl font-semibold text-gray-800">Aula 4</span><i class="fas fa-play-circle text-gray-400"></i></div></a>
+                    <a href="#" data-video-src="https://drive.google.com/file/d/1qld4mP9W-6J-a4rfGN8vy4arknqYDUgm/preview" class="video-link block w-full text-left p-4 border-2 border-gray-200 rounded-lg transition hover:bg-indigo-50 hover:border-accent"><div class="flex items-center justify-between"><span class="text-xl font-semibold text-gray-800">Aula 5</span><i class="fas fa-play-circle text-gray-400"></i></div></a>
+                    <a href="#" data-video-src="https://drive.google.com/file/d/1f4LADI9AStB8mS3JmOdoceQCApZasgA3/preview" class="video-link block w-full text-left p-4 border-2 border-gray-200 rounded-lg transition hover:bg-indigo-50 hover:border-accent"><div class="flex items-center justify-between"><span class="text-xl font-semibold text-gray-800">Aula 6</span><i class="fas fa-play-circle text-gray-400"></i></div></a>
+                    <a href="#" data-video-src="https://drive.google.com/file/d/1Xmr6LqISYKvw8Sxpqg4v2im9wZa9aGRx/preview" class="video-link block w-full text-left p-4 border-2 border-gray-200 rounded-lg transition hover:bg-indigo-50 hover:border-accent"><div class="flex items-center justify-between"><span class="text-xl font-semibold text-gray-800">Aula 7</span><i class="fas fa-play-circle text-gray-400"></i></i></div></a>
+                    <a href="#" data-video-src="https://drive.google.com/file/d/1viyfuhaoCn0l1oBwxZCERBdA7ojE1qHj/preview" class="video-link block w-full text-left p-4 border-2 border-gray-200 rounded-lg transition hover:bg-indigo-50 hover:border-accent"><div class="flex items-center justify-between"><span class="text-xl font-semibold text-gray-800">Aula 8</span><i class="fas fa-play-circle text-gray-400"></i></div></a>
+                    <a href="#" data-video-src="https://drive.google.com/file/d/12x2gMPRLpvp73VNdWDAQY1uHlGHLbbk2/preview" class="video-link block w-full text-left p-4 border-2 border-gray-200 rounded-lg transition hover:bg-indigo-50 hover:border-accent"><div class="flex items-center justify-between"><span class="text-xl font-semibold text-gray-800">Aula 9</span><i class="fas fa-play-circle text-gray-400"></i></div></a>
+                    <a href="#" data-video-src="https://drive.google.com/file/d/1Ejse7wXa7-va7gaNW2_Wlsm2KEYETwi_/preview" class="video-link block w-full text-left p-4 border-2 border-gray-200 rounded-lg transition hover:bg-indigo-50 hover:border-accent"><div class="flex items-center justify-between"><span class="text-xl font-semibold text-gray-800">Aula 10</span><i class="fas fa-play-circle text-gray-400"></i></div></a>
+                    <a href="#" data-video-src="https://drive.google.com/file/d/1WPi1Sdp8BpSrc1ViuRhO70kTvwBpP31m/preview" class="video-link block w-full text-left p-4 border-2 border-gray-200 rounded-lg transition hover:bg-indigo-50 hover:border-accent"><div class="flex items-center justify-between"><span class="text-xl font-semibold text-gray-800">Aula 11</span><i class="fas fa-play-circle text-gray-400"></i></div></a>
+                    <a href="#" data-video-src="https://drive.google.com/file/d/1gq4t0n3hXDVFB2qL1ZcLvQaOFdZZnh5D/preview" class="video-link block w-full text-left p-4 border-2 border-gray-200 rounded-lg transition hover:bg-indigo-50 hover:border-accent"><div class="flex items-center justify-between"><span class="text-xl font-semibold text-gray-800">Aula 12</span><i class="fas fa-play-circle text-gray-400"></i></div></a>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="template-biotecnologias">
+        <div class="page container mx-auto px-6 pt-32">
+            <h2 class="text-4xl font-bold text-primary text-center mb-12">Biotecnologias da Reprodução</h2>
+            <div id="biotecnologias-content" class="max-w-4xl mx-auto space-y-4" data-accordion-container>
+                <!-- Content will be loaded dynamically from Firestore -->
+                <div class="text-center p-8 bg-white rounded-xl shadow-lg">
+                    <div class="spinner mx-auto mb-4"></div>
+                    <p class="text-gray-600">Carregando conteúdo de Biotecnologias...</p>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="template-laboratorial">
+        <div class="page container mx-auto px-6 pt-32">
+            <h2 class="text-4xl font-bold text-primary text-center mb-12">Rotina Laboratorial de FIV</h2>
+            <div id="laboratorial-content" class="max-w-4xl mx-auto space-y-4" data-accordion-container>
+                <!-- Content will be loaded dynamically from Firestore -->
+                <div class="text-center p-8 bg-white rounded-xl shadow-lg">
+                    <div class="spinner mx-auto mb-4"></div>
+                    <p class="text-gray-600">Carregando conteúdo de Rotina Laboratorial...</p>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="template-tetf">
+        <div class="page container mx-auto px-6 pt-32">
+            <h2 class="text-4xl font-bold text-primary text-center mb-12">Transferência de Embriões em Tempo Fixo (TETF)</h2>
+            <div id="tetf-content" class="max-w-4xl mx-auto space-y-4" data-accordion-container>
+                <!-- Content will be loaded dynamically from Firestore -->
+                <div class="text-center p-8 bg-white rounded-xl shadow-lg">
+                    <div class="spinner mx-auto mb-4"></div>
+                    <p class="text-gray-600">Carregando conteúdo de TETF...</p>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="template-portfolio">
+        <div class="page container mx-auto px-6 pt-32">
+            <h2 class="text-4xl font-bold text-primary text-center mb-12">Currículo</h2>
+            <div class="max-w-3xl mx-auto text-center bg-white p-12 rounded-xl shadow-lg">
+                <h3 class="text-2xl font-semibold text-accent mb-4">Em Construção</h3>
+                <p class="text-lg text-gray-600">Esta página está sendo preparada. Em breve, meu currículo online estará disponivel.</p>
+            </div>
+        </div>
+    </template>
+
+    <!-- Updated template for breed list -->
+    <template id="template-racas">
+        <div class="page container mx-auto px-6 pt-32">
+            <h2 class="text-4xl font-bold text-primary text-center mb-12">Guia de raças de bovinos</h2>
+            <div id="breeds-list-container" class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <!-- Breed list items will be injected here by JavaScript -->
+            </div>
+            <!-- Download Button for PDF -->
+            <div class="text-center mt-8">
+                <a href="https://docs.google.com/file/d/0B0JtK3OiJ8mmWEs5M3hVSWVTYTZoNk5MbWZTMVUzdw/edit" target="_blank" rel="noopener noreferrer" class="inline-flex items-center bg-primary text-white font-semibold px-6 py-3 rounded-full shadow-md hover:bg-primary-dark transition">
+                    <i class="fas fa-download mr-2"></i>
+                    Baixar Guia Completo de Raças (PDF)
+                </a>
+            </div>
+        </div>
+    </template>
+
+    <!-- Template for Joguinhos page -->
+    <template id="template-joguinhos">
+        <div class="page container mx-auto px-6 pt-32">
+            <h2 class="text-4xl font-bold text-primary text-center mb-12">Jogos</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Quiz de Reprodução Bovina -->
+                <div class="bg-white rounded-xl shadow-lg p-6 transition-shadow hover:shadow-xl flex flex-col relative">
+                    <h3 class="text-2xl font-bold text-accent mb-4">Quiz de Reprodução Bovina</h3>
+                    <p class="text-gray-700 leading-relaxed flex-grow">Prepare-se para desafiar seus conhecimentos sobre reprodução bovina! Este quiz interativo está quase pronto para ser lançado.</p>
+                    <div class="mt-4">
+                        <a href="https://quiz-repro.vercel.app/" target="_blank" rel="noopener noreferrer" class="jogos-btn-animated font-semibold px-5 py-2.5 rounded-full inline-flex items-center shadow-lg transition transform hover:scale-105">
+                            <i class="fas fa-play-circle mr-2"></i> Jogar
+                        </a>
+                    </div>
+                </div>
+                <!-- Classificação de Oócitos Bovinos -->
+                <div class="bg-white rounded-xl shadow-lg p-6 transition-shadow hover:shadow-xl flex flex-col relative">
+                    <h3 class="text-2xl font-bold text-accent mb-4">Classificação de Oócitos Bovinos</h3>
+                    <p class="text-gray-700 leading-relaxed flex-grow">Teste suas habilidades na classificação visual de oócitos bovinos!</p>
+                    <div class="mt-4">
+                        <a href="https://class-o-citos-bice.vercel.app/" target="_blank" rel="noopener noreferrer" class="jogos-btn-animated font-semibold px-5 py-2.5 rounded-full inline-flex items-center shadow-lg transition transform hover:scale-105">
+                            <i class="fas fa-play-circle mr-2"></i> Jogar
+                        </a>
+                    </div>
+                </div>
+                <!-- Quiz Bandeiras pelo Mundo -->
+                <div class="bg-white rounded-xl shadow-lg p-6 transition-shadow hover:shadow-xl flex flex-col relative">
+                    <div class="extra-game-tag">Jogo extra</div>
+                    <h3 class="text-2xl font-bold text-accent mb-4">Quiz Bandeiras pelo Mundo</h3>
+                    <p class="text-gray-700 leading-relaxed flex-grow">Teste seus conhecimentos sobre bandeiras de países ao redor do mundo neste divertido quiz!</p>
+                    <div class="mt-4 text-gray-500 production-animation">
+                        <i class="fas fa-tools mr-2"></i> <span class="animated-red-gradient-text">Em produção</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- NEW OPU TEMPLATES -->
+    <template id="template-opu">
+        <div class="page container mx-auto px-6 pt-32">
+            <h2 class="text-4xl font-bold text-primary text-center mb-12">OPU: Aspiração Folicular</h2>
+            <div id="opu-content" class="max-w-4xl mx-auto space-y-4" data-accordion-container>
+                <!-- Content will be loaded dynamically from Firestore -->
+                <div class="text-center p-8 bg-white rounded-xl shadow-lg">
+                    <div class="spinner mx-auto mb-4"></div>
+                    <p class="text-gray-600">Carregando conteúdo de OPU...</p>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- NEW MESA DE SELECAO TEMPLATES -->
+    <template id="template-mesa-selecao">
+        <div class="page container mx-auto px-6 pt-32">
+            <h2 class="text-4xl font-bold text-primary text-center mb-12">Mesa de Seleção</h2>
+            <div id="mesa-selecao-content" class="max-w-4xl mx-auto space-y-4" data-accordion-container>
+                <!-- Content will be loaded dynamically from Firestore -->
+                <div class="text-center p-8 bg-white rounded-xl shadow-lg">
+                    <div class="spinner mx-auto mb-4"></div>
+                    <p class="text-gray-600">Carregando conteúdo de Mesa de Seleção...</p>
+                </div>
+            </div>
+        </div>
+    </template>
+
+
+    <!-- NEW: Painel de Controle Template -->
+    <template id="template-painel-controle">
+        <div class="page container mx-auto px-6 pt-32">
+            <h2 class="text-4xl font-bold text-primary text-center mb-12">Painel de Controle</h2>
+            <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
+                <p class="text-gray-600 mb-4 text-center">ID do Usuário Logado: <span id="logged-in-user-id" class="font-semibold text-primary">Carregando...</span></p>
+                <div class="mb-6">
+                    <label for="cms-section-select" class="block text-gray-700 text-sm font-bold mb-2">Selecione a Seção para Editar:</label>
+                    <select id="cms-section-select" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                        <option value="">-- Selecione uma seção --</option>
+                        <option value="fisiologia">Fisiologia</option>
+                        <option value="biotecnologias">Biotecnologias</option>
+                        <option value="opu">OPU</option>
+                        <option value="tetf">TETF</option>
+                        <option value="laboratorial">Rotina Laboratorial</option>
+                        <!-- Add other sections here as needed -->
+                    </select>
+                </div>
+
+                <div id="cms-editor-area" class="border-t border-gray-200 pt-6 mt-6 hidden">
+                    <h3 class="text-2xl font-bold text-accent mb-4">Itens da Seção Atual</h3>
+                    <div id="cms-item-list" class="space-y-3 mb-6">
+                        <div class="text-center p-4 bg-gray-50 rounded-lg">
+                            <div class="spinner mx-auto mb-2"></div>
+                            <p class="text-gray-600">Carregando itens...</p>
+                        </div>
+                    </div>
+
+                    <button id="cms-add-new-btn" class="bg-primary text-white font-semibold py-2 px-4 rounded-lg hover:bg-primary-dark transition mb-6">
+                        <i class="fas fa-plus mr-2"></i> Adicionar Novo Item
+                    </button>
+
+                    <h3 class="text-2xl font-bold text-accent mb-4" id="cms-form-title">Adicionar/Editar Item</h3>
+                    <form id="cms-item-form" class="space-y-4">
+                        <input type="hidden" id="cms-item-id">
+                        <div>
+                            <label for="cms-item-title" class="block text-gray-700 text-sm font-bold mb-2">Título do Item:</label>
+                            <input type="text" id="cms-item-title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" placeholder="Título do acordeão">
+                        </div>
+                        <div>
+                            <label for="cms-item-content" class="block text-gray-700 text-sm font-bold mb-2">Conteúdo do Item (HTML, incluindo imagens, permitido):</label>
+                            <textarea id="cms-item-content" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 h-40 resize-y leading-tight focus:outline-none focus:shadow-outline" placeholder="Conteúdo detalhado do item..."></textarea>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <button type="submit" id="cms-save-btn" class="bg-accent text-white font-bold py-2 px-4 rounded-lg hover:bg-accent-dark transition">
+                                <i class="fas fa-save mr-2"></i> Salvar Item
+                            </button>
+                            <button type="button" id="cms-cancel-edit-btn" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400 transition hidden">
+                                Cancelar
+                            </button>
+                            <span id="cms-status-message" class="text-sm font-semibold ml-4"></span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </template>
+
+
+    <!-- MODALS -->
+    <!-- Video Modal -->
+    <div id="video-modal" class="hidden fixed inset-0 bg-black/70 z-[80] flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-black w-full max-w-4xl aspect-video rounded-lg shadow-2xl relative modal-content">
+            <button id="close-video-modal-btn" class="absolute -top-3 -right-3 text-white bg-red-600 rounded-full w-8 h-8 flex items-center justify-center text-lg font-bold">&times;</button>
+            <iframe id="video-iframe" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <!-- Search Results Modal -->
+    <div id="search-results-modal" class="hidden fixed inset-0 bg-black/60 z-[60] flex items-start justify-center pt-16 md:pt-24 px-4 modal-overlay">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-3xl max-h-[70vh] flex flex-col modal-content">
+            <header class="p-4 border-b flex justify-between items-center sticky top-0 bg-white rounded-t-lg">
+                <h3 class="text-xl font-bold text-primary">Resultados da Busca para "<span id="search-term"></span>"</h3>
+                <button id="close-search-modal-btn" class="text-gray-500 hover:text-red-500 text-3xl leading-none">&times;</button>
+            </header>
+            <div id="search-results-container" class="p-6 overflow-y-auto">
+                <!-- Search results will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Modal -->
+    <div id="quiz-modal" class="hidden fixed inset-0 bg-black/60 z-[60] flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl modal-content">
+            <header class="p-4 border-b flex justify-between items-center">
+                <h3 id="quiz-title" class="text-xl font-bold text-primary">Teste de Conhecimento Geral</h3>
+                <button id="close-quiz-modal-btn" class="text-gray-500 hover:text-red-500 text-3xl leading-none">&times;</button>
+            </header>
+            <div id="quiz-body" class="p-6">
+                <!-- Quiz content will be injected here -->
+            </div>
+            <footer id="quiz-footer" class="p-4 bg-gray-50 border-t text-right rounded-b-lg">
+                <button id="quiz-next-btn" class="bg-accent text-white font-bold py-2 px-6 rounded-lg hover:bg-accent-dark transition disabled:bg-gray-400" disabled>Verificar</button>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Custom Alert/Confirm Modal -->
+    <div id="custom-alert-modal" class="hidden fixed inset-0 bg-black/60 z-[90] flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm modal-content p-6 text-center">
+            <h3 class="text-xl font-bold text-primary mb-4" id="custom-alert-title"></h3>
+            <p class="text-gray-700 mb-6" id="custom-alert-message"></p>
+            <div id="custom-alert-buttons" class="flex justify-center space-x-4">
+                <button id="custom-alert-ok" class="bg-accent text-white font-bold py-2 px-6 rounded-lg hover:bg-accent-dark transition">OK</button>
+                <button id="custom-alert-cancel" class="bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg hover:bg-gray-400 transition hidden">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+    // Firebase SDK imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js"; // Updated Firebase SDK version
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-auth.js"; // Updated Firebase SDK version
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js"; // Updated Firebase SDK version
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // ---- CORE VARIABLES ----
+        const appRoot = document.getElementById('app-root');
+        const body = document.body;
+
+        // ---- FIREBASE INITIALIZATION ----
+        let db;
+        let auth;
+        let appId; // This will now come from firebaseConfig.projectId
+        let userId;
+        let isAuthReady = false; // Flag to ensure Firestore operations happen after auth
+
+        // SEU OBJETO firebaseConfig - COPIE E COLE AQUI AS SUAS CREDENCIAIS DO CONSOLE DO FIREBASE
+        // EXTREMAMENTE IMPORTANTE: Substitua os valores abaixo pelos seus próprios!
+        const firebaseConfig = {
+            apiKey: "AIzaSyA-4V69fbmAZQpynAFp-k4zgUto0EKt_Uc",
+            authDomain: "sitepedro-eb3de.firebaseapp.com",
+            projectId: "sitepedro-eb3de",
+            storageBucket: "sitepedro-eb3de.firebasestorage.app",
+            messagingSenderId: "1019271128426",
+            appId: "1:1019271128426:web:74c26a6fd35642ad107113"
+        };
+
+        const initializeFirebase = async () => {
+            try {
+                // Define appId usando o projectId do seu firebaseConfig
+                appId = firebaseConfig.projectId;
+
+                if (!firebaseConfig.apiKey || firebaseConfig.apiKey === "SUA_API_KEY" || firebaseConfig.projectId === "SEU_PROJECT_ID") {
+                    console.error("Firebase config is not set. Please update firebaseConfig with your actual keys.");
+                    showCustomAlert('Erro de Configuração', 'As credenciais do Firebase não foram configuradas. O painel de controle não funcionará. Por favor, edite o código HTML na seção `firebaseConfig` com suas chaves reais.');
+                    return;
+                }
+
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // Sign in anonymously for basic access. For more robust CMS, consider user authentication.
+                await signInAnonymously(auth);
+
+                // Listen for auth state changes
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        isAuthReady = true;
+                        console.log("Firebase authenticated. User ID:", userId);
+                        const loggedInUserIdSpan = document.getElementById('logged-in-user-id');
+                        if (loggedInUserIdSpan) {
+                            loggedInUserIdSpan.textContent = userId;
+                        }
+                        // Re-render current page if it's the CMS page and data needs to be loaded
+                        if (window.location.hash === '#/painel-controle') {
+                            loadCmsSectionContent();
+                        }
+                    } else {
+                        userId = null;
+                        isAuthReady = false;
+                        console.log("Firebase not authenticated.");
+                        const loggedInUserIdSpan = document.getElementById('logged-in-user-id');
+                        if (loggedInUserIdSpan) {
+                            loggedInUserIdSpan.textContent = 'Não Autenticado';
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error("Erro ao inicializar Firebase ou autenticar:", error);
+                showCustomAlert('Erro de Inicialização', `Não foi possível conectar ao Firebase: ${error.message}`);
+            }
+        };
+
+
+        // ---- ROUTING ----
+        const routes = {
+            '/': 'template-inicio',
+            '/fisiologia': 'template-fisiologia',
+            '/guia': 'template-guia',
+            '/classificacao': 'template-classificacao',
+            '/video-aulas': 'template-video-aulas',
+            '/biotecnologias': 'template-biotecnologias',
+            '/tetf': 'template-tetf',
+            '/laboratorial': 'template-laboratorial',
+            '/portfolio': 'template-portfolio',
+            '/racas': 'template-racas',
+            '/lista-racas': 'template-racas',
+            '/joguinhos': 'template-joguinhos',
+            '/joguinhos/classificacao-oocitos': 'template-joguinhos',
+            '/opu': 'template-opu',
+            '/mesa-selecao': 'template-mesa-selecao',
+            '/painel-controle': 'template-painel-controle'
+        };
+
+        // Sections that will use dynamic content from Firestore
+        const dynamicContentSections = {
+            'fisiologia': 'Fisiologia da Reprodução',
+            'biotecnologias': 'Biotecnologias da Reprodução',
+            'opu': 'OPU: Aspiração Folicular',
+            'tetf': 'Transferência de Embriões em Tempo Fixo (TETF)',
+            'laboratorial': 'Rotina Laboratorial de FIV'
+        };
+
+        // Function to fetch and render dynamic accordion content for a page
+        const fetchAndRenderAccordionContent = async (containerId, sectionName) => {
+            const container = document.getElementById(containerId);
+            if (!container) {
+                console.error(`Container with ID ${containerId} not found.`);
+                return;
+            }
+
+            // Show loading spinner
+            container.innerHTML = `
+                <div class="text-center p-8 bg-white rounded-xl shadow-lg">
+                    <div class="spinner mx-auto mb-4"></div>
+                    <p class="text-gray-600">Carregando conteúdo de ${dynamicContentSections[sectionName]}...</p>
+                </div>
+            `;
+
+            if (!isAuthReady || !userId) {
+                console.warn('Firebase not ready or user not authenticated. Cannot fetch content.');
+                // Try again after a short delay if not ready, or display error
+                setTimeout(() => fetchAndRenderAccordionContent(containerId, sectionName), 500);
+                return;
+            }
+
+            try {
+                // Path: /artifacts/{appId}/users/{userId}/siteContent/{sectionName}
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/siteContent`, sectionName);
+                const docSnap = await getDoc(docRef);
+
+                container.innerHTML = ''; // Clear loading spinner
+
+                if (docSnap.exists() && docSnap.data().items && docSnap.data().items.length > 0) {
+                    const items = docSnap.data().items;
+                    items.forEach(item => {
+                        const accordionItemHtml = `
+                            <div class="accordion-item bg-white rounded-xl shadow-lg overflow-hidden">
+                                <div class="accordion-header p-6 flex justify-between items-center hover:bg-indigo-50" data-accordion-btn>
+                                    <h3 class="text-xl font-semibold text-primary">${item.title}</h3>
+                                    <i class="fas fa-chevron-down accordion-icon text-primary"></i>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="p-6 pt-0">${item.content}</div>
+                                </div>
+                            </div>
+                        `;
+                        container.insertAdjacentHTML('beforeend', accordionItemHtml);
+                    });
+                    initializeAccordions(); // Re-initialize accordion behavior for new content
+                } else {
+                    container.innerHTML = `
+                        <div class="text-center p-8 bg-white rounded-xl shadow-lg">
+                            <p class="text-gray-600">Nenhum conteúdo encontrado para esta seção.</p>
+                            <p class="text-gray-500 text-sm mt-2">Adicione conteúdo através do <a href="#/painel-controle" class="text-accent hover:underline">Painel de Controle</a>.</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error(`Erro ao carregar conteúdo para ${sectionName}:`, error);
+                container.innerHTML = `
+                    <div class="text-center p-8 bg-red-100 border border-red-400 text-red-700 rounded-xl shadow-lg">
+                        <p class="font-bold mb-2">Erro ao carregar conteúdo!</p>
+                        <p class="text-sm">Por favor, tente novamente mais tarde ou verifique sua conexão.</p>
+                    </div>
+                `;
+            }
+        };
+
+
+        const renderPage = async (path) => {
+            closeAllModals();
+
+            const templateId = routes[path] || routes['/'];
+            const template = document.getElementById(templateId);
+
+            if (template) {
+                appRoot.innerHTML = '';
+                const pageContent = template.content.cloneNode(true);
+                appRoot.appendChild(pageContent);
+                window.scrollTo(0, 0);
+
+                // Initialize page-specific scripts
+                if (path === '/racas' || path === '/lista-racas') {
+                    renderBreedList();
+                } else if (path === '/video-aulas') {
+                    addVideoLinkListeners();
+                } else if (path === '/painel-controle') {
+                    // First, append the content
+                    // The pageContent is already appended by appRoot.appendChild(pageContent)
+                    // Then, get fresh references and set up listeners
+                    setupCmsElementsAndListeners();
+                    // Then load content
+                    loadCmsSectionContent();
+                } else if (dynamicContentSections[path.substring(1)]) { // Check if it's a dynamic content page
+                    const sectionName = path.substring(1);
+                    const containerId = `${sectionName}-content`; // e.g., 'fisiologia-content'
+                    await fetchAndRenderAccordionContent(containerId, sectionName);
+                } else {
+                    // For static pages or others, just ensure accordions are initialized if they exist
+                    if (appRoot.querySelector('[data-accordion-container]')) {
+                         initializeAccordions();
+                    }
+                }
+            }
+        };
+
+        const setActiveLink = (path) => {
+            document.querySelectorAll('a.nav-link, a.nav-link-mobile').forEach(link => {
+                const linkPath = new URL(link.href).hash.substring(1) || '/';
+                link.classList.toggle('active', linkPath === path);
+            });
+
+            document.querySelectorAll('[data-dropdown-container]').forEach(container => {
+                let isParentActive = false;
+                container.querySelectorAll('.dropdown-menu a').forEach(link => {
+                    const linkPath = new URL(link.href).hash.substring(1) || '/';
+                    if (linkPath === path) isParentActive = true;
+                });
+                container.querySelectorAll('[data-dropdown-menu-nested] a').forEach(link => {
+                    const linkPath = new URL(link.href).hash.substring(1) || '/';
+                    if (linkPath === path) isParentActive = true;
+                });
+
+                const dropdownButton = container.querySelector('[data-dropdown-button]');
+                if (dropdownButton.classList.contains('nav-link')) {
+                    dropdownButton.classList.toggle('active', isParentActive);
+                }
+            });
+
+            document.querySelectorAll('.mobile-accordion-btn').forEach(btn => {
+                let isParentActive = false;
+                const content = btn.nextElementSibling;
+                const btnLink = btn.closest('a');
+                if (btnLink) {
+                    const btnPath = new URL(btnLink.href).hash.substring(1) || '/';
+                    if (btnPath === path) {
+                        isParentActive = true;
+                    }
+                }
+
+                if (content && content.classList.contains('mobile-accordion-content')) {
+                    content.querySelectorAll('a.nav-link-mobile, .mobile-accordion-btn').forEach(childElement => {
+                        if (childElement.tagName === 'A') {
+                            const childPath = new URL(childElement.href).hash.substring(1) || '/';
+                            if (childPath === path) isParentActive = true;
+                        } else if (childElement.tagName === 'BUTTON' && childElement.classList.contains('mobile-accordion-btn')) {
+                            const nestedContent = childElement.nextElementSibling;
+                            if (nestedContent && nestedContent.classList.contains('mobile-accordion-content')) {
+                                nestedContent.querySelectorAll('a.nav-link-mobile').forEach(nestedLink => {
+                                    const nestedPath = new URL(nestedLink.href).hash.substring(1) || '/';
+                                    if (nestedPath === path) isParentActive = true;
+                                });
+                            }
+                        }
+                    });
+                }
+
+                if(isParentActive) {
+                    btn.classList.add('open');
+                    if (content) content.classList.add('open');
+                } else {
+                    btn.classList.remove('open');
+                    if (content) content.classList.remove('open');
+                }
+
+                if (!btn.classList.contains('mobile-oocitos-btn')) {
+                    btn.classList.toggle('mobile-parent-active', isParentActive);
+                }
+            });
+        };
+
+
+        const router = () => {
+            let path = window.location.hash.substring(1) || '/';
+            renderPage(path);
+            setActiveLink(path);
+        };
+
+        window.addEventListener('hashchange', router);
+
+        // ---- ACCORDION FUNCTIONALITY ----
+        const initializeAccordions = () => {
+            const accordionContainers = document.querySelectorAll('[data-accordion-container]');
+            accordionContainers.forEach(container => {
+                const accordionBtns = container.querySelectorAll('[data-accordion-btn]');
+                accordionBtns.forEach((btn, index) => {
+                    // Remove existing event listener to prevent duplicates
+                    btn.removeEventListener('click', toggleAccordion);
+                    // Add new event listener
+                    btn.addEventListener('click', toggleAccordion);
+
+                    // Open the first item by default if it's not the CMS page
+                    if (index === 0 && window.location.hash !== '#/painel-controle') {
+                        btn.classList.add('active');
+                        const content = btn.nextElementSibling;
+                        if (content) {
+                            content.classList.add('open');
+                            content.style.maxHeight = content.scrollHeight + "px";
+                            content.style.paddingTop = '0';
+                            content.style.paddingBottom = '1.5rem';
+                        }
+                    } else if (window.location.hash === '#/painel-controle') {
+                         // Ensure all accordions are closed by default on CMS page load
+                        btn.classList.remove('active');
+                        const content = btn.nextElementSibling;
+                        if (content) {
+                            content.classList.remove('open');
+                            content.style.maxHeight = '0';
+                            content.style.paddingTop = '0';
+                            content.style.paddingBottom = '0';
+                        }
+                    }
+                });
+            });
+        };
+
+        // Reusable toggle function for accordions
+        function toggleAccordion(event) {
+            const btn = event.currentTarget;
+            const container = btn.closest('[data-accordion-container]');
+            const content = btn.nextElementSibling;
+
+            // Close all other open accordions in the same container
+            if (container) {
+                container.querySelectorAll('.accordion-header.active').forEach(activeBtn => {
+                    if (activeBtn !== btn) {
+                        activeBtn.classList.remove('active');
+                        const activeContent = activeBtn.nextElementSibling;
+                        if (activeContent) {
+                            activeContent.classList.remove('open');
+                            activeContent.style.maxHeight = '0';
+                            activeContent.style.paddingTop = '0';
+                            activeContent.style.paddingBottom = '0';
+                        }
+                    }
+                });
+            }
+
+            // Toggle the clicked accordion
+            btn.classList.toggle('active');
+            if (content) {
+                content.classList.toggle('open');
+                if (content.classList.contains('open')) {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                    content.style.paddingTop = '0'; // p-6 pt-0
+                    content.style.paddingBottom = '1.5rem'; // p-6 pb-6
+                } else {
+                    content.style.maxHeight = '0';
+                    content.style.paddingTop = '0';
+                    content.style.paddingBottom = '0';
+                }
+            }
+        }
+
+
+        // ---- UI HELPERS & EVENT LISTENERS ----
+        document.querySelectorAll('[data-dropdown-container]').forEach(container => {
+            const button = container.querySelector('[data-dropdown-button]');
+            const menu = container.querySelector('.dropdown-menu'); // Select the main dropdown menu
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Close all other main dropdowns
+                document.querySelectorAll('[data-dropdown-menu]').forEach(m => {
+                    if (m !== menu) { // Don't hide the current menu
+                        m.classList.add('hidden');
+                    }
+                });
+                menu.classList.toggle('hidden'); // Toggle the current menu
+            });
+        });
+
+        // Close all dropdowns when clicking anywhere else on the document
+        document.addEventListener('click', (e) => {
+            document.querySelectorAll('[data-dropdown-menu]').forEach(menu => {
+                // Check if the click target is outside the dropdown menu and its parent button
+                const parentContainer = menu.closest('[data-dropdown-container]');
+                if (parentContainer && !parentContainer.contains(e.target)) {
+                    menu.classList.add('hidden');
+                }
+            });
+            // Also close nested dropdowns
+            document.querySelectorAll('[data-dropdown-menu-nested]').forEach(nestedMenu => {
+                const parentGroup = nestedMenu.closest('.group');
+                if (parentGroup && !parentGroup.contains(e.target)) {
+                    nestedMenu.classList.add('hidden');
+                }
+            });
+        });
+
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const closeMenuBtn = document.getElementById('close-menu-btn');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+
+        const openMobileMenu = () => {
+             mobileMenu.classList.remove('hidden');
+             setTimeout(() => {
+                 body.classList.add('modal-open');
+                 mobileMenu.classList.add('open');
+             }, 10);
+        }
+
+        const closeMobileMenu = () => {
+            mobileMenu.classList.remove('open');
+            setTimeout(() => {
+                mobileMenu.classList.add('hidden');
+                // Only remove modal-open if no other modals are open
+                if (quizModal.classList.contains('hidden') && searchResultsModal.classList.contains('hidden') && videoModal.classList.contains('hidden') && customAlertModal.classList.contains('hidden')) {
+                    body.classList.remove('modal-open');
+                }
+            }, 300);
+        }
+
+        menuBtn.addEventListener('click', openMobileMenu);
+        closeMenuBtn.addEventListener('click', closeMobileMenu);
+        mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+        // Ensure all mobile menu links also close the menu
+        document.querySelectorAll('.nav-link-mobile').forEach(link => link.addEventListener('click', closeMobileMenu));
+        document.querySelectorAll('.mobile-accordion-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                // Prevent immediate closing of nested accordion if it's the direct target
+                if (e.target === button || button.contains(e.target)) {
+                    e.preventDefault(); // Prevent default if click is on button itself or its children
+                }
+
+                const content = button.nextElementSibling;
+                const isCurrentlyOpen = content && content.classList.contains('open');
+
+                // Close all other open accordions at the same level
+                const parentDiv = button.closest('nav') || button.closest('.mobile-accordion-content');
+                if (parentDiv) {
+                    parentDiv.querySelectorAll('.mobile-accordion-content.open').forEach(c => {
+                        if (c !== content) {
+                            c.classList.remove('open');
+                            c.style.maxHeight = '0';
+                            c.style.paddingTop = '0';
+                            c.style.paddingBottom = '0';
+                            c.previousElementSibling.classList.remove('open'); // Remove 'open' from sibling button
+                        }
+                    });
+                }
+
+                // Toggle the clicked accordion
+                if (content) {
+                    if (isCurrentlyOpen) {
+                        content.classList.remove('open');
+                        content.style.maxHeight = '0';
+                        content.style.paddingTop = '0';
+                        content.style.paddingBottom = '0';
+                        button.classList.remove('open');
+                    } else {
+                        content.classList.add('open');
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        content.style.paddingTop = '0';
+                        content.style.paddingBottom = '1.5rem';
+                        button.classList.add('open');
+                    }
+                }
+            });
+        });
+
+
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        const debounce = (func, delay) => {
+            let timeoutId;
+            return (...args) => {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => func.apply(this, args), delay);
+            };
+        };
+
+        // Centralized modal closing function
+        const closeAllModals = () => {
+            closeSearchModal();
+            closeQuizModal();
+            closeVideoModal();
+            closeCustomAlert(); // Close custom alert too
+            // Only remove modal-open if NO modals are active
+            if (quizModal.classList.contains('hidden') && searchResultsModal.classList.contains('hidden') && videoModal.classList.contains('hidden') && customAlertModal.classList.contains('hidden')) {
+                body.classList.remove('modal-open');
+            }
+        }
+
+        // --- SEARCH FUNCTIONALITY ---
+        const searchInputDesktop = document.getElementById('search-input-desktop');
+        const searchInputMobile = document.getElementById('search-input-mobile');
+        const mobileSearchOpenBtn = document.getElementById('mobile-search-open-btn');
+        const mobileSearchCloseBtn = document.getElementById('mobile-search-close-btn');
+        const headerMain = document.getElementById('header-main');
+        const headerSearchMobile = document.getElementById('header-search-mobile');
+        const searchResultsModal = document.getElementById('search-results-modal');
+        const searchResultsContainer = document.getElementById('search-results-container');
+        const closeSearchModalBtn = document.getElementById('close-search-modal-btn');
+        const searchTermSpan = document.getElementById('search-term');
+        let fuse;
+        const searchData = [];
+
+        const prepareSearchData = () => {
+            if (searchData.length > 0) return;
+            try {
+                Object.keys(routes).forEach(path => {
+                    // Exclude pages that are just lists or modals themselves or CMS-managed
+                    if (['/video-aulas', '/portfolio', '/joguinhos', '/joguinhos/classificacao-oocitos', '/painel-controle'].includes(path) || dynamicContentSections[path.substring(1)]) {
+                        // Skip dynamic content pages, their content will be fetched from Firestore directly
+                        return;
+                    }
+                    const templateId = routes[path];
+                    const template = document.getElementById(templateId);
+                    if (!template) return;
+                    const content = template.content.cloneNode(true);
+                    const pageTitle = content.querySelector('h2')?.textContent.trim() || 'Início';
+                    const contentBlocks = content.querySelectorAll('.bg-white.rounded-xl, .bg-white.shadow-lg, .accordion-content > div');
+                    if (contentBlocks.length > 0) {
+                        contentBlocks.forEach(block => {
+                            const subTitle = block.querySelector('h3, h4')?.textContent.trim() || '';
+                            const textContent = Array.from(block.querySelectorAll('p, li')).map(p => p.textContent.trim()).join(' ');
+                            if (textContent || subTitle) {
+                                searchData.push({ path, pageTitle, subTitle, content: textContent || subTitle });
+                            }
+                        });
+                    } else { // Fallback for pages without structured cards
+                        const allText = Array.from(content.querySelectorAll('p, li, h1, h2, h3, h4')).map(el => el.textContent.trim()).join(' ');
+                        if (allText) searchData.push({ path, pageTitle, subTitle: '', content: allText });
+                    }
+                });
+                fuse = new Fuse(searchData, { keys: ['pageTitle', 'subTitle', 'content'], includeScore: true, includeMatches: true, threshold: 0.4, minMatchCharLength: 2, ignoreLocation: true });
+            } catch (error) { console.error("Error preparing search data:", error); }
+        };
+
+        const performSearch = (query) => {
+            if (!fuse) prepareSearchData();
+            if (query.length < 3) return;
+            const results = fuse.search(query);
+            searchTermSpan.textContent = query;
+            searchResultsContainer.innerHTML = '';
+            if (results.length > 0) {
+                results.forEach(result => {
+                    const { item, matches } = result;
+                    let highlightedText = item.content.substring(0, 200) + '...';
+                    const contentMatch = matches.find(m => m.key === 'content');
+                    if (contentMatch && contentMatch.indices.length > 0) {
+                        const firstIndex = contentMatch.indices[0][0];
+                        const start = Math.max(0, firstIndex - 50);
+                        const end = Math.min(item.content.length, firstIndex + 150);
+                        highlightedText = '...' + item.content.substring(start, end).replace(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'), `<mark>$1</mark>`) + '...';
+                    }
+                    const resultEl = document.createElement('a');
+                    resultEl.href = `#${item.path}`;
+                    resultEl.className = 'block p-4 mb-4 bg-gray-50 hover:bg-indigo-50 rounded-lg shadow transition';
+                    resultEl.innerHTML = `<h4 class="text-lg font-bold text-primary">${item.subTitle || item.pageTitle}</h4><p class="text-sm text-gray-500 mb-2">Na seção: ${item.pageTitle}</p><div class="text-gray-700 text-sm">${highlightedText}</div>`;
+                    resultEl.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        window.location.hash = item.path;
+                        closeSearchModal();
+                    });
+                    searchResultsContainer.appendChild(resultEl);
+                });
+            } else {
+                searchResultsContainer.innerHTML = '<p class="text-gray-600">Nenhum resultado encontrado.</p>';
+            }
+            searchResultsModal.classList.remove('hidden');
+            body.classList.add('modal-open');
+        };
+
+        const closeSearchModal = () => {
+            searchResultsModal.classList.add('hidden');
+            // Re-check other modals before removing body.modal-open
+            if (quizModal.classList.contains('hidden') && videoModal.classList.contains('hidden') && customAlertModal.classList.contains('hidden')) {
+                body.classList.remove('modal-open');
+            }
+        };
+
+        const debouncedSearch = debounce(performSearch, 300);
+        [searchInputDesktop, searchInputMobile].forEach(input => {
+            input.addEventListener('input', (e) => debouncedSearch(e.target.value.trim()));
+        });
+        mobileSearchOpenBtn.addEventListener('click', () => {
+            headerMain.classList.add('hidden');
+            headerSearchMobile.classList.remove('hidden');
+            searchInputMobile.focus();
+        });
+        mobileSearchCloseBtn.addEventListener('click', () => {
+            headerMain.classList.remove('hidden');
+            headerSearchMobile.classList.add('hidden');
+        });
+        closeSearchModalBtn.addEventListener('click', closeSearchModal);
+        searchResultsModal.addEventListener('click', (e) => { if (e.target === searchResultsModal) closeSearchModal(); });
+
+        // --- VIDEO MODAL FUNCTIONALITY ---
+        const videoModal = document.getElementById('video-modal');
+        const videoIframe = document.getElementById('video-iframe');
+        const closeVideoModalBtn = document.getElementById('close-video-modal-btn');
+
+        function addVideoLinkListeners() {
+            document.querySelectorAll('.video-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const videoSrc = e.currentTarget.dataset.videoSrc;
+                    if(videoSrc) {
+                        videoIframe.src = videoSrc;
+                        videoModal.classList.remove('hidden');
+                        body.classList.add('modal-open');
+                    }
+                });
+            });
+        }
+
+        function closeVideoModal() {
+            videoIframe.src = '';
+            videoModal.classList.add('hidden');
+            // Re-check other modals before removing body.modal-open
+            if (quizModal.classList.contains('hidden') && searchResultsModal.classList.contains('hidden') && customAlertModal.classList.contains('hidden')) {
+                body.classList.remove('modal-open');
+            }
+        }
+        closeVideoModalBtn.addEventListener('click', closeVideoModal);
+        videoModal.addEventListener('click', (e) => { if (e.target === videoModal) closeVideoModal(); });
+
+
+        // --- QUIZ FUNCTIONALITY ---
+        const quizModal = document.getElementById('quiz-modal');
+        const quizTitleEl = document.getElementById('quiz-title');
+        const closeQuizModalBtn = document.getElementById('close-quiz-modal-btn');
+        const quizBody = document.getElementById('quiz-body');
+        const quizNextBtn = document.getElementById('quiz-next-btn');
+        let quizState = 'idle';
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let currentQuizQuestions = [];
+
+        const shuffleArray = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+
+        const reproductionQuestionBank = [
+            { question: "Qual hormônio é responsável por causar a regressão do Corpo Lúteo (CL)?", options: ["GnRH", "Progesterona", "Prostaglandina F2α", "eCG"], answer: "Prostaglandina F2α" },
+            { question: "O que significa a sigla LH no contexto da fisiologia reprodutiva?", options: ["Hormônio Luteotrófico", "Hormônio Liberador de Gonadotropina", "Hormônio Luteinizante", "Hormônio Folicular"], answer: "Hormônio Luteinizante" },
+            { question: "Durante qual fase do ciclo estral a fêmea está receptiva ao macho (cio)?", options: ["Proestro", "Estro", "Metaestro", "Diestro"], answer: "Estro" },
+            { question: "O 'comando central' da reprodução, que libera GnRH, é o:", options: ["Ovário", "Útero", "Hipófise", "Hipotálamo"], answer: "Hipotálamo" },
+            { question: "Quantas 'ondas' de crescimento folicular ocorrem, em média, durante o ciclo estral bovino?", options: ["Uma", "Duas a três", "Cinco a seis", "Varia a cada dia"], answer: "Duas a três" },
+            { question: "O que é um oócito?", options: ["O gameta masculino", "O gameta feminino", "Um tipo de hormônio", "Uma célula da placenta"], answer: "O gameta feminino" },
+            { question: "Em qual estrutura ovariana o oócito está localizado?", options: ["No corpo lúteo", "No endométrio", "No folículo", "No oviduto"], answer: "No folículo" },
+            { question: "Folículos que possuem uma cavidade preenchida por fluido são classificados como:", options: ["Primordiais", "Pré-antrais", "Secundários", "Antrais ou Terciários"], answer: "Antrais ou Terciários" },
+            { question: "Um oócito com mais de três camadas de células do cumulus e citoplasma regular é classificado como:", options: ["Grau I", "Grau II", "Grau III", "Desnudo"], answer: "Grau I" },
+            { question: "Um oócito completamente sem células do cumulus é classificado como:", options: ["Grau I", "Grau II", "Grau III", "Desnudo"], answer: "Desnudo" },
+            { question: "A qualidade do citoplasma é um fator na classificação de oócitos. Um citoplasma irregular é uma característica de oócitos de:", options: ["Melhor qualidade", "Pior qualidade", "Qualidade intermediária", "Não afeta a qualidade"], answer: "Pior qualidade" },
+            { question: "Qual o objetivo da IATF?", options: ["Produzir clones", "Inseminar muitas fêmeas sem observar o cio", "Coletar oócitos para FIV", "Congelar sêmen"], answer: "Inseminar muitas fêmeas sem observar o cio" },
+            { question: "Qual técnica é considerada a mais poderosa para maximizar a descendência de uma fêmea de alto valor?", options: ["Monta Natural", "IATF", "MOET", "PIVE (OPU-FIV)"], answer: "PIVE (OPU-FIV)" },
+            { question: "O que significa a sigla DEPs na avaliação de touros?", options: ["Dados de Expectativa de Parto", "Diferença Esperada na Progênie", "Desempenho Efetivo Ponderado", "Divisão de Embriões Pós-fecundação"], answer: "Diferença Esperada na Progênie" },
+            { question: "A clonagem é uma ferramenta de:", options: ["Melhoramento genético em massa", "'Resgate' genético de indivíduos excepcionais", "Produção de embriões mais baratos", "Sincronização de cio"], answer: "'Resgate' genético de indivíduos excepcionais" },
+            { question: "Na TETF, o que é uma 'receptora'?", options: ["A fêmea de alto valor genético", "A fêmea que doa o sêmen", "A fêmea 'barriga de aluguel'", "A fêmea que ainda não atingiu a puberdade"], answer: "A fêmea 'barriga de aluguel'" },
+            { question: "Para o sucesso da TETF, o ciclo estral da receptora deve estar sincronizado com:", options: ["O ciclo da doadora", "A fase da lua", "O estágio de desenvolvimento do embrião", "A estação do ano"], answer: "O estágio de desenvolvimento do embrião" },
+            { question: "No dia da TETF, qual estrutura ovariana deve ser confirmada por ultrassom na receptora?", options: ["Um folículo dominante", "Um cisto folicular", "Um corpo lúteo viável", "A ausência de estruturas"], answer: "Um corpo lúteo viável" },
+            { question: "Qual a primeira etapa da PIVE após a seleção dos oócitos no laboratório?", options: ["Cultivo In Vitro (CIV)", "Fertilização In Vitro (FIV)", "Maturação In Vitro (MIV)", "Congelamento"], answer: "Maturação In Vitro (MIV)" },
+            { question: "No D7 do cultivo, um embrião viável para transferência ou congelamento deve estar no estágio mínimo de:", options: ["Mórula (Mo)", "Blastocisto Inicial (Bi)", "Zigoto", "4 células"], answer: "Blastocisto Inicial (Bi)" },
+            { question: "A técnica de congelamento ultra-rápido de embriões, que evita a formação de cristais de gelo, é chamada de:", options: ["Congelamento lento", "Refrigeração", "Vitrificação", "Liofilização"], answer: "Vitrificação" },
+            { question: "A Massa Celular Interna (MCI) de um blastocisto dará origem a qual estrutura?", options: ["A placenta", "O feto", "O saco amniótico", "O cordão umbilical"], answer: "O feto" }
+        ];
+
+        const launchQuiz = (title, questionBank, questionsCount = 10) => {
+            currentQuestionIndex = 0;
+            score = 0;
+            shuffleArray(questionBank);
+            currentQuizQuestions = questionBank.slice(0, questionsCount);
+
+            quizTitleEl.textContent = title;
+            quizModal.classList.remove('hidden');
+            body.classList.add('modal-open');
+            displayQuestion();
+        };
+
+        const displayQuestion = () => {
+            quizState = 'answering';
+            let selectedOption = null;
+            const questionData = currentQuizQuestions[currentQuestionIndex];
+
+            quizBody.innerHTML = `
+                <p class="text-lg font-semibold mb-1 text-gray-800">Pergunta ${currentQuestionIndex + 1} de ${currentQuizQuestions.length}</p>
+                <p class="text-xl mb-6">${questionData.question}</p>
+                <div id="quiz-options" class="space-y-3">${shuffleArray([...questionData.options]).map(option => `<button class="quiz-option w-full text-left p-4 border-2 rounded-lg transition">${option}</button>`).join('')}</div>
+            `;
+
+            quizNextBtn.disabled = true;
+            quizNextBtn.textContent = 'Verificar';
+            document.querySelectorAll('.quiz-option').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (quizState !== 'answering') return;
+                    document.querySelectorAll('.quiz-option').forEach(b => b.classList.remove('selected'));
+                    selectedOption = e.currentTarget;
+                    selectedOption.classList.add('selected');
+                    quizNextBtn.disabled = false;
+                });
+            });
+            quizNextBtn.onclick = () => { if (quizState === 'answering' && selectedOption) showResult(selectedOption); };
+        };
+
+        const showResult = (selectedOption) => {
+            quizState = 'showing_result';
+            const questionData = currentQuizQuestions[currentQuestionIndex];
+            document.querySelectorAll('.quiz-option').forEach(btn => {
+                btn.disabled = true;
+                if (btn.textContent.trim() === questionData.answer) btn.classList.add('correct');
+            });
+            if (selectedOption.textContent.trim() === questionData.answer) score++;
+            else selectedOption.classList.add('incorrect');
+            quizNextBtn.disabled = false;
+            if (currentQuestionIndex >= currentQuizQuestions.length - 1) {
+                quizNextBtn.textContent = 'Ver Resultado Final';
+                quizNextBtn.onclick = showFinalScore;
+            } else {
+                quizNextBtn.textContent = 'Próxima Pergunta';
+                quizNextBtn.onclick = () => { currentQuestionIndex++; displayQuestion(); };
+            }
+        };
+
+        const showFinalScore = () => {
+            quizState = 'finished';
+            const percentage = Math.round((score / currentQuizQuestions.length) * 100);
+            let message = '';
+            if (percentage === 100) message = 'Excelente! Você é um expert!';
+            else if (percentage >= 70) message = 'Muito bom! Você tem um ótimo conhecimento na área.';
+            else if (percentage >= 50) message = 'Bom trabalho! Continue estudando para aprimorar.';
+            else message = 'Não desanime! Revise o conteúdo e tente novamente.';
+            quizBody.innerHTML = `<div class="text-center"><h3 class="text-2xl font-bold mb-2">Quiz Finalizado!</h3><p class="text-lg mb-4">Sua pontuação foi:</p><p class="text-5xl font-bold text-primary mb-4">${score} / ${currentQuizQuestions.length}</p><p class="text-lg">${message}</p></div>`;
+            quizNextBtn.textContent = 'Refazer Quiz';
+            quizNextBtn.onclick = startReproductionQuiz;
+        };
+
+        const closeQuizModal = () => {
+            quizModal.classList.add('hidden');
+            // Re-check other modals before removing body.modal-open
+            if (searchResultsModal.classList.contains('hidden') && videoModal.classList.contains('hidden') && customAlertModal.classList.contains('hidden')) {
+                body.classList.remove('modal-open');
+            }
+            quizState = 'idle';
+        };
+
+        const startReproductionQuiz = () => {
+            launchQuiz('Quiz de Reprodução Bovina', reproductionQuestionBank, 10);
+        };
+
+        document.getElementById('start-quiz-btn-header').addEventListener('click', startReproductionQuiz);
+        document.getElementById('start-quiz-btn-header-mobile').addEventListener('click', startReproductionQuiz);
+        closeQuizModalBtn.addEventListener('click', closeQuizModal);
+
+        // --- BREED GUIDE FUNCTIONALITY ---
+        const getFlagUrl = (countryName) => {
+            const countryCodes = {
+                "África do Sul": "ZA", "França": "FR", "Espanha": "ES", "Portugal": "PT", "Suécia": "SE", "Reino Unido": "GB", "Uganda": "UG", "Bélgica": "BE", "Estados Unidos": "US", "Indonésia": "ID", "Quênia": "KE", "Índia": "IN", "Colômbia": "CO", "Paquistão": "PK", "Itália": "IT", "Canadá": "CA", "Brasil": "BR", "Dinamarca": "DK", "Irlanda": "IE", "Alemanha": "DE", "Etiópia": "ET", "Islândia": "IS", "Austrália": "AU", "Nicarágua": "NI", "Grécia": "GR", "México": "MX", "China": "CN", "Japão": "JP", "Holanda": "NL", "Suíça": "CH"
+            };
+            const code = countryCodes[countryName] || "UN"; // Default to UN if not found
+            return `https://flagsapi.com/${code}/flat/32.png`;
+        };
+
+        const breedData = [
+            { name: "Africander (Afrikaner)", country: "África do Sul" }, { name: "Alberes (Massanaise)", country: "França" }, { name: "Alentejana", country: "Portugal" }, { name: "Allmogekor", country: "Suécia" }, { name: "Angus (Aberdeen Angus)", country: "Reino Unido" }, { name: "Ankole (Ankole Longhorn)", country: "Uganda" }, { name: "Bazadaise", country: "França" }, { name: "Beefalo", country: "Estados Unidos" }, { name: "Belgian Red (Rood Van Belgie - Rouge De Belgique)", country: "Bélgica" }, { name: "Belgian Red Pied (Roodbont - Pied Rouge)", country: "Bélgica" }, { name: "Belgian White and Red (Witrood Ras Van Belgie - Blanc-Rouge De Belgique)", country: "Bélgica" }, { name: "Blanca Cacereña", country: "Espanha" }, { name: "Blanco Orejinegro", country: "Colômbia" }, { name: "Blonde d'Aquitaine", country: "França" }, { name: "Boran (East African Shorthorned Zebu)", country: "Quênia" }, { name: "Borneo Banteng (Malay Banten - Sapi Utra)", country: "Indonésia" }, { name: "Braford", country: "Estados Unidos" }, { name: "Brahman", country: "Índia" }, { name: "Brangus", country: "Estados Unidos" }, { name: "Braunvieh", country: "Suíça" }, { name: "Brava (Fighting Bull - Brave - Toros de Lidia)", country: "Espanha" }, { name: "Bretonne Pie-Noire", country: "França" }, { name: "British White", country: "Reino Unido" }, { name: "British White Park", country: "Reino Unido" }, { name: "Búfalos (Carabao)", country: "Austrália" }, { name: "Búfalos (Jafarabadi)", country: "Índia" }, { name: "Búfalos (Mediterrânea)", country: "Itália" }, { name: "Búfalos (Murrah)", country: "Índia" }, { name: "Búfalos (Nili Ravi)", country: "Paquistão" }, { name: "Cachena", country: "Espanha" }, { name: "Canadense (Black Canadian)", country: "Canadá" }, { name: "Canchim", country: "Brasil" }, { name: "Caracu", country: "Brasil" }, { name: "Charolês", country: "França" }, { name: "Chianina", country: "Itália" }, { name: "Corriente", country: "Estados Unidos" }, { name: "Criollo Lechero Tropical (Reyna)", country: "Nicarágua" }, { name: "Crioulo Lageano", country: "Brasil" }, { name: "Curraleiro (Pé Duro)", country: "Brasil" }, { name: "Danish Red (Dansk Rødbroget Kvæg)", country: "Dinamarca" }, { name: "Devon", country: "Reino Unido" }, { name: "Dexter", country: "Irlanda" }, { name: "Gayal (Gaur)", country: "Índia" }, { name: "Gelbvieh", country: "Alemanha" }, { name: "Gir", country: "Índia" }, { name: "Gir Leiteiro", country: "Índia" }, { name: "Girolando", country: "Brasil" }, { name: "Guernsey", country: "Reino Unido" }, { name: "Guzerá (Guzerat - Azulego - Kankrej)", country: "Índia" }, { name: "Hereford (Polled Hereford)", country: "Reino Unido" }, { name: "Highland (West Highland)", country: "Reino Unido" }, { name: "Holstein (Frisona - Holstein Friesian - Holando Argentino - Holandesa)", country: "Holanda" }, { name: "Horro (Wallega - Wollega - Wellega)", country: "Etiópia" }, { name: "Icelandic (Íslenska Kýrin)", country: "Islândia" }, { name: "Illawara", country: "Austrália" }, { name: "Indubrasil", country: "Brasil" }, { name: "Jersey", country: "Reino Unido" }, { name: "Junqueira", country: "Brasil" }, { name: "Katerini", country: "Grécia" }, { name: "Kerry", country: "Irlanda" }, { name: "Limousin", country: "França" }, { name: "Limpurger", country: "Alemanha" }, { name: "Lincoln Red", country: "Reino Unido" }, { name: "Lohani (Acchai)", country: "Paquistão" }, { name: "Lourdaise", country: "França" }, { name: "Lowline", country: "Austrália" }, { name: "Marchigiana", country: "Itália" }, { name: "Maremmana", country: "Itália" }, { name: "Maronesa", country: "Portugal" }, { name: "Menorquina", country: "Espanha" }, { name: "Mocho Nacional", country: "Brasil" }, { name: "Morucha Capa Negra", country: "Espanha" }, { name: "Murray Grey", country: "Austrália" }, { name: "Nelore", country: "Índia" }, { name: "Normando", country: "França" }, { name: "Original Braunvieh (Brown Original - Original Austrian Brown - Österreichisches Braunvieh)", country: "Suíça" }, { name: "Pantaneiro (Tucura - Cuiabano)", country: "Brasil" }, { name: "Parda", country: "Espanha" }, { name: "Parda de Montanha", country: "Espanha" }, { name: "Pardo Suíço (Swiss Brown)", country: "Suíça" }, { name: "Pie Noire Holstein (Zwartbont - Holstein)", country: "Holanda" }, { name: "P Piemontês (Piamontesa)", country: "Itália" }, { name: "Pirenaica", country: "Espanha" }, { name: "Randall", country: "Estados Unidos" }, { name: "Red Angus", country: "Reino Unido" }, { name: "Red Brangus", country: "Estados Unidos" }, { name: "Red Friesian (Fries Roodbont - Friesian red and White)", country: "Holanda" }, { name: "Red Poll", country: "Reino Unido" }, { name: "Retinta", country: "Espanha" }, { name: "Salers", country: "França" }, { name: "Sanmartinero", country: "Colômbia" }, { name: "Santa Gertrudis", country: "Estados Unidos" }, { name: "Shorthorn", country: "Reino Unido" }, { name: "Simbrah", country: "Estados Unidos" }, { name: "Simmental", country: "Suíça" }, { name: "Tabapuã", country: "Brasil" }, { name: "Tarentaise", country: "Estados Unidos" }, { name: "Texas Longhorn", country: "Estados Unidos" }, { name: "Tropicarne", country: "México" }, { name: "Wagyu", country: "Japão" }, { name: "Yak", country: "China" }
+        ];
+
+        const renderBreedList = () => {
+            const breedsListContainer = document.getElementById('breeds-list-container');
+            if (!breedsListContainer) {
+                console.error("Breeds list container not found.");
+                return;
+            }
+            breedsListContainer.innerHTML = ''; // Clear previous content
+
+            // Sort breedData alphabetically by name
+            const sortedBreedData = [...breedData].sort((a, b) => a.name.localeCompare(b.name));
+
+            const ulElement = document.createElement('ul');
+            ulElement.className = 'list-none p-0 space-y-4'; // Basic list styling
+
+            sortedBreedData.forEach(breed => {
+                const liElement = document.createElement('li');
+                liElement.className = 'flex items-center p-4 border-b border-gray-200 last:border-b-0'; // Each item is a flex container for flag and text
+
+                // Flag image
+                const flagImg = document.createElement('img');
+                flagImg.src = getFlagUrl(breed.country);
+                flagImg.alt = `Bandeira do(a) ${breed.country}`;
+                flagImg.className = 'w-6 h-4 mr-3 rounded-sm shadow-sm flex-shrink-0'; // Small fixed size for flag
+                flagImg.onerror = function() {
+                    this.onerror = null; // Prevent infinite loop
+                    this.src = 'https://flagsapi.com/UN/flat/32.png'; // Fallback to UN flag
+                };
+                liElement.appendChild(flagImg);
+
+                // Breed name (no description)
+                const breedNameSpan = document.createElement('span');
+                breedNameSpan.className = 'text-lg font-semibold text-gray-800 flex-grow'; // Name takes remaining space
+                breedNameSpan.textContent = breed.name;
+                liElement.appendChild(breedNameSpan);
+
+                ulElement.appendChild(liElement);
+            });
+            breedsListContainer.appendChild(ulElement);
+        };
+
+        // Event listeners for new breed buttons in header
+        document.getElementById('open-racas-btn-header').addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.hash = '#/racas'; // Now points directly to the list
+            closeMobileMenu(); // Close mobile menu if open
+        });
+        document.getElementById('open-racas-btn-header-mobile').addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.hash = '#/racas'; // Now points directly to the list
+            closeMobileMenu(); // Close mobile menu after navigation
+        });
+
+        // --- Custom Alert/Confirm Modal ---
+        const customAlertModal = document.getElementById('custom-alert-modal');
+        const customAlertTitle = document.getElementById('custom-alert-title');
+        const customAlertMessage = document.getElementById('custom-alert-message');
+        const customAlertOkBtn = document.getElementById('custom-alert-ok');
+        const customAlertCancelBtn = document.getElementById('custom-alert-cancel');
+
+        let resolveCustomAlertPromise;
+
+        function showCustomAlert(title, message, isConfirm = false) {
+            return new Promise((resolve) => {
+                customAlertTitle.textContent = title;
+                customAlertMessage.innerHTML = message; // Use innerHTML to allow basic formatting if needed
+                customAlertCancelBtn.classList.toggle('hidden', !isConfirm);
+                customAlertModal.classList.remove('hidden');
+                body.classList.add('modal-open');
+
+                resolveCustomAlertPromise = resolve;
+
+                const handleOk = () => {
+                    resolveCustomAlertPromise(true);
+                    closeCustomAlert();
+                    customAlertOkBtn.removeEventListener('click', handleOk);
+                    customAlertCancelBtn.removeEventListener('click', handleCancel);
+                };
+                const handleCancel = () => {
+                    resolveCustomAlertPromise(false);
+                    closeCustomAlert();
+                    customAlertOkBtn.removeEventListener('click', handleOk);
+                    customAlertCancelBtn.removeEventListener('click', handleCancel);
+                };
+
+                customAlertOkBtn.addEventListener('click', handleOk);
+                customAlertCancelBtn.addEventListener('click', handleCancel);
+            });
+        }
+
+        function closeCustomAlert() {
+            customAlertModal.classList.add('hidden');
+            // Re-check other modals before removing body.modal-open
+            if (quizModal.classList.contains('hidden') && searchResultsModal.classList.contains('hidden') && videoModal.classList.contains('hidden')) {
+                body.classList.remove('modal-open');
+            }
+        }
+        customAlertModal.addEventListener('click', (e) => {
+            if (e.target === customAlertModal) {
+                if (customAlertCancelBtn.classList.contains('hidden')) { // It's an alert
+                    resolveCustomAlertPromise(true);
+                } else { // It's a confirm
+                    resolveCustomAlertPromise(false);
+                }
+                closeCustomAlert();
+            }
+        });
+
+
+        // --- CMS FUNCTIONALITY (Painel de Controle) ---
+        let cmsSectionSelect;
+        let cmsEditorArea;
+        let cmsItemList;
+        let cmsAddItemBtn;
+        let cmsItemForm;
+        let cmsItemId;
+        let cmsItemTitle;
+        let cmsItemContent;
+        let cmsSaveBtn;
+        let cmsCancelEditBtn;
+        let cmsStatusMessage;
+
+        let currentSectionData = { items: [] }; // Stores data for the currently selected section
+        let currentEditingItemId = null; // null for add mode, ID for edit mode
+
+        const setupCmsElementsAndListeners = () => {
+            // Get fresh references to CMS elements after the template is rendered
+            cmsSectionSelect = document.getElementById('cms-section-select');
+            cmsEditorArea = document.getElementById('cms-editor-area');
+            cmsItemList = document.getElementById('cms-item-list');
+            cmsAddItemBtn = document.getElementById('cms-add-new-btn');
+            cmsItemForm = document.getElementById('cms-item-form');
+            cmsItemId = document.getElementById('cms-item-id');
+            cmsItemTitle = document.getElementById('cms-item-title');
+            cmsItemContent = document.getElementById('cms-item-content');
+            cmsSaveBtn = document.getElementById('cms-save-btn');
+            cmsCancelEditBtn = document.getElementById('cms-cancel-edit-btn');
+            cmsStatusMessage = document.getElementById('cms-status-message');
+
+            // Remove existing event listeners to prevent duplicates before adding them again
+            // This is crucial when the CMS page is re-rendered (e.g., navigating back to it)
+            if (cmsSectionSelect) cmsSectionSelect.removeEventListener('change', loadCmsSectionContent);
+            if (cmsAddItemBtn) cmsAddItemBtn.removeEventListener('click', resetCmsForm);
+            if (cmsItemForm) cmsItemForm.removeEventListener('submit', saveCmsItem);
+            if (cmsCancelEditBtn) cmsCancelEditBtn.removeEventListener('click', resetCmsForm);
+
+            // Add event listeners
+            if (cmsSectionSelect) cmsSectionSelect.addEventListener('change', loadCmsSectionContent);
+            if (cmsAddItemBtn) cmsAddItemBtn.addEventListener('click', () => resetCmsForm());
+            if (cmsItemForm) cmsItemForm.addEventListener('submit', saveCmsItem);
+            if (cmsCancelEditBtn) cmsCancelEditBtn.addEventListener('click', () => resetCmsForm());
+        };
+
+        const showCmsLoading = (containerEl) => {
+            if (containerEl) { // Added null check
+                containerEl.innerHTML = `
+                    <div class="text-center p-4 bg-gray-50 rounded-lg">
+                        <div class="spinner mx-auto mb-2"></div>
+                        <p class="text-gray-600">Carregando itens...</p>
+                    </div>
+                `;
+            }
+        };
+
+        const showCmsMessage = (message, isError = false) => {
+            if (cmsStatusMessage) { // Added null check
+                cmsStatusMessage.textContent = message;
+                cmsStatusMessage.className = `text-sm font-semibold ml-4 ${isError ? 'text-red-600' : 'text-green-600'}`;
+                setTimeout(() => {
+                    if (cmsStatusMessage) { // Added null check here as well for delayed execution
+                        cmsStatusMessage.textContent = '';
+                        cmsStatusMessage.className = 'text-sm font-semibold ml-4';
+                    }
+                }, 3000);
+            }
+        };
+
+        const loadCmsSectionContent = async () => {
+            // Ensure CMS elements are available before proceeding
+            if (!cmsSectionSelect) {
+                console.warn('CMS elements not yet available. Retrying loadCmsSectionContent...');
+                setTimeout(loadCmsSectionContent, 100); // Retry after a short delay
+                return;
+            }
+
+            const selectedSection = cmsSectionSelect.value;
+            if (!selectedSection) {
+                if (cmsEditorArea) cmsEditorArea.classList.add('hidden'); // Added null check
+                return;
+            }
+            if (cmsEditorArea) cmsEditorArea.classList.remove('hidden'); // Added null check
+            showCmsLoading(cmsItemList);
+            resetCmsForm(); // Clear the form when changing sections
+
+            if (!isAuthReady || !userId) {
+                console.warn('Firebase not ready or user not authenticated for CMS.');
+                if (cmsItemList) { // Added null check
+                    cmsItemList.innerHTML = `<p class="text-red-500">Erro: Não foi possível carregar o painel de controle. Autenticação pendente ou falha.</p>`;
+                }
+                return;
+            }
+
+            try {
+                // Path: /artifacts/{appId}/users/${userId}/siteContent/{sectionName}
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/siteContent`, selectedSection);
+                const docSnap = await getDoc(docRef);
+
+                if (cmsItemList) cmsItemList.innerHTML = ''; // Clear loading spinner, Added null check
+
+                if (docSnap.exists() && docSnap.data().items) {
+                    currentSectionData = docSnap.data();
+                    displayCmsItems(currentSectionData.items);
+                } else {
+                    currentSectionData = { items: [] };
+                    displayCmsItems([]); // No items yet
+                }
+            } catch (error) {
+                console.error("Erro ao carregar conteúdo do CMS:", error);
+                showCmsMessage("Erro ao carregar conteúdo.", true);
+                if (cmsItemList) { // Added null check
+                    cmsItemList.innerHTML = `<p class="text-red-500">Erro ao carregar conteúdo: ${error.message}</p>`;
+                }
+            }
+        };
+
+        const displayCmsItems = (items) => {
+            if (!cmsItemList) return; // Added null check
+            cmsItemList.innerHTML = '';
+            if (items.length === 0) {
+                cmsItemList.innerHTML = '<p class="text-gray-600">Nenhum item encontrado nesta seção. Adicione um novo!</p>';
+                return;
+            }
+            items.forEach(item => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'flex justify-between items-center bg-gray-100 p-3 rounded-lg shadow-sm';
+                itemEl.innerHTML = `
+                    <span class="text-gray-800 font-medium flex-grow">${item.title}</span>
+                    <div>
+                        <button data-id="${item.id}" data-action="edit" class="bg-blue-500 text-white px-3 py-1 rounded-md text-sm hover:bg-blue-600 transition mr-2">Editar</button>
+                        <button data-id="${item.id}" data-action="delete" class="bg-red-500 text-white px-3 py-1 rounded-md text-sm hover:bg-red-600 transition">Excluir</button>
+                    </div>
+                `;
+                cmsItemList.appendChild(itemEl);
+            });
+
+            // Add event listeners for edit/delete buttons
+            cmsItemList.querySelectorAll('button[data-action="edit"]').forEach(button => {
+                button.addEventListener('click', (e) => editCmsItem(e.target.dataset.id));
+            });
+            cmsItemList.querySelectorAll('button[data-action="delete"]').forEach(button => {
+                button.addEventListener('click', (e) => deleteCmsItem(e.target.dataset.id));
+            });
+        };
+
+        const resetCmsForm = () => {
+            if (cmsItemId) cmsItemId.value = '';
+            if (cmsItemTitle) cmsItemTitle.value = '';
+            if (cmsItemContent) cmsItemContent.value = '';
+            currentEditingItemId = null;
+            const cmsFormTitle = document.getElementById('cms-form-title');
+            if (cmsFormTitle) cmsFormTitle.textContent = 'Adicionar Novo Item';
+            if (cmsCancelEditBtn) cmsCancelEditBtn.classList.add('hidden');
+            if (cmsSaveBtn) {
+                cmsSaveBtn.textContent = 'Salvar Item';
+                const saveIcon = cmsSaveBtn.querySelector('i');
+                if (saveIcon) saveIcon.className = 'fas fa-save mr-2';
+            }
+        };
+
+        const editCmsItem = (id) => {
+            const itemToEdit = currentSectionData.items.find(item => item.id === id);
+            if (itemToEdit) {
+                if (cmsItemId) cmsItemId.value = itemToEdit.id;
+                if (cmsItemTitle) cmsItemTitle.value = itemToEdit.title;
+                if (cmsItemContent) cmsItemContent.value = itemToEdit.content;
+                currentEditingItemId = id;
+                const cmsFormTitle = document.getElementById('cms-form-title');
+                if (cmsFormTitle) cmsFormTitle.textContent = `Editando: ${itemToEdit.title}`;
+                if (cmsCancelEditBtn) cmsCancelEditBtn.classList.remove('hidden');
+                if (cmsSaveBtn) {
+                    cmsSaveBtn.textContent = 'Atualizar Item';
+                    const saveIcon = cmsSaveBtn.querySelector('i');
+                    if (saveIcon) saveIcon.className = 'fas fa-sync-alt mr-2'; // Change icon for update
+                }
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); // Scroll to form
+            }
+        };
+
+        const saveCmsItem = async (event) => {
+            event.preventDefault();
+            if (cmsSaveBtn) { // Added null check
+                cmsSaveBtn.disabled = true;
+                cmsSaveBtn.innerHTML = '<div class="spinner w-5 h-5 border-2 mx-auto"></div>'; // Show spinner
+            }
+            const selectedSection = cmsSectionSelect.value;
+            const id = cmsItemId.value || crypto.randomUUID(); // Generate new ID if adding
+            const title = cmsItemTitle.value.trim();
+            const content = cmsItemContent.value.trim();
+
+            if (!title || !content) {
+                showCmsMessage("Título e conteúdo não podem estar vazios.", true);
+                if (cmsSaveBtn) { // Added null check
+                    cmsSaveBtn.disabled = false;
+                    cmsSaveBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Salvar Item';
+                }
+                return;
+            }
+
+            try {
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/siteContent`, selectedSection);
+                let updatedItems = [];
+
+                if (currentEditingItemId) {
+                    // Edit existing item
+                    updatedItems = currentSectionData.items.map(item =>
+                        item.id === id ? { id, title, content } : item
+                    );
+                } else {
+                    // Add new item
+                    updatedItems = [...currentSectionData.items, { id, title, content }];
+                }
+
+                await setDoc(docRef, { items: updatedItems });
+                showCmsMessage("Conteúdo salvo com sucesso!");
+                loadCmsSectionContent(); // Reload list to reflect changes
+                resetCmsForm(); // Clear and reset form
+            } catch (error) {
+                console.error("Erro ao salvar item do CMS:", error);
+                showCmsMessage(`Erro ao salvar conteúdo: ${error.message}`, true);
+            } finally {
+                if (cmsSaveBtn) { // Added null check
+                    cmsSaveBtn.disabled = false;
+                    cmsSaveBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Salvar Item';
+                }
+            }
+        };
+
+        const deleteCmsItem = async (idToDelete) => {
+            const confirmed = await showCustomAlert('Confirmar Exclusão', 'Tem certeza que deseja excluir este item de conteúdo? Esta ação não pode ser desfeita.', true);
+            if (!confirmed) return;
+
+            if (cmsSaveBtn) cmsSaveBtn.disabled = true; // Disable save button during delete, Added null check
+            const selectedSection = cmsSectionSelect.value;
+
+            try {
+                const docRef = doc(db, `artifacts/${appId}/users/${userId}/siteContent`, selectedSection);
+                const updatedItems = currentSectionData.items.filter(item => item.id !== idToDelete);
+
+                await setDoc(docRef, { items: updatedItems });
+                showCmsMessage("Item excluído com sucesso!");
+                loadCmsSectionContent(); // Reload list to reflect changes
+                resetCmsForm();
+            } catch (error) {
+                console.error("Erro ao excluir item do CMS:", error);
+                showCmsMessage(`Erro ao excluir item: ${error.message}`, true);
+            } finally {
+                if (cmsSaveBtn) cmsSaveBtn.disabled = false; // Added null check
+            }
+        };
+
+
+        // ---- INITIAL LOAD ----
+        // Initialize Firebase before routing
+        initializeFirebase().then(() => {
+            router();
+            prepareSearchData(); // Prepare search data after Firebase is ready
+        });
+    });
+    </script>
+</body>
+</html>
